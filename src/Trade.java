@@ -1,5 +1,7 @@
+import java.io.Serializable;
 
-public class Trade {
+
+public class Trade implements Serializable{
 	String date;
 	String nation;
 	int serial_num;

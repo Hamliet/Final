@@ -8,6 +8,15 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,12 +45,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 	ArrayList<Trade> t = new ArrayList<Trade>();
 	int i; //for문을 위한 변수
 	
-	/*
-	    FileInputStream fis = new FileInputStream("D:/TradeList.txt");
-		InputStreamReader isl = new InputStreamReader(fis,"euc-kr");
-		BufferedReader br  =  new BufferedReader(isl);//br.readLine();
-	 */
-	
+
 	
 	/*
 	    FileOutputStream fos = new FileOutputStream("D:/TradeList_output.txt");
@@ -58,6 +62,8 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
         oos.reset();
             
         System.out.println("저장되었습니다"); 
+        
+        
 	 
 	 */
 	
@@ -90,7 +96,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 	
 	public MyFrame(){ //생성자
 		setTitle("Trade Manager");
-		setSize(900, 750);
+		setSize(980, 760);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		button1 = new JButton("1.새 무역정보 추가");
 		button2 = new JButton("2.무역정보 수정/삭제");
@@ -100,7 +106,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 		button6 = new JButton("6.날짜별 파이그래프 ");	
 		clear_button = new JButton("CLEAR");
 		send_button = new JButton("Send");
-		ta = new TextArea("",40,88,TextArea.SCROLLBARS_VERTICAL_ONLY);
+		ta = new TextArea("",39,98,TextArea.SCROLLBARS_VERTICAL_ONLY);
 		memo = new TextArea("",40,30,TextArea.SCROLLBARS_VERTICAL_ONLY);
 		tf = new JTextField(20);
 		p1 = new JPanel();
@@ -202,9 +208,11 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 			
 		}
 		if(e.getSource() == button3){
+			
 			if(t.size() !=0){
+				ta.setText("");
 				for(i=0;i<t.size();i++){
-					ta.append("< "+t.get(i).serial_num+" >  "+t.get(i).date.substring(0,4)+"년"+t.get(i).date.substring(5)+"월　　수출건수:"+t.get(i).exports+"　　수출금액:"+t.get(i).export_sum+"　　수입건수:"+t.get(i).imports+"　　수입금액:"+t.get(i).import_sum+"　　무역수지"+(t.get(i).export_sum - t.get(i).import_sum));
+					ta.append("< "+t.get(i).serial_num+" >　("+t.get(i).nation+")　"+t.get(i).date.substring(0,4)+"년"+t.get(i).date.substring(5)+"월　수출건수:"+t.get(i).exports+"　수출금액:"+t.get(i).export_sum+"　수입건수:"+t.get(i).imports+"　수입금액:"+t.get(i).import_sum+"　무역수지:"+(t.get(i).export_sum - t.get(i).import_sum+"\n"));
 				}
 			}
 			else{
@@ -214,22 +222,136 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 			
 		}
 		if(e.getSource() == button4){
-			Button4_Frame b4 = new Button4_Frame(MyFrame.this);
+			if(t.size() !=0){
+				ta.setText("");
+				Button4_Frame b4 = new Button4_Frame(MyFrame.this);
+			}
+			else{
+				ta.append("등록된 자료가 없습니다.\n");
+			}
+			
 		}
+			
 		if(e.getSource() == button5){
-			Button5_Frame b5 = new Button5_Frame(MyFrame.this);
+			
+			if(t.size() !=0){
+				Button5_Frame b5 = new Button5_Frame(MyFrame.this);
+			}
+			else{
+				ta.append("등록된 자료가 없습니다.\n");
+			}
+			
+		}
+		if(e.getSource() == button6){
+			
+			if(t.size() !=0){
+				Button5_Frame b6 = new Button5_Frame(MyFrame.this);
+			}
+			else{
+				ta.append("등록된 자료가 없습니다.\n");
+			}
+			
 		}
 		if(e.getSource() == send_button){
 			memo.append(tf.getText()+"\n");
 			tf.setText("");
 		}
+		
 		if(e.getSource() == menuItemOpentxt){
+			t.clear();
+			FileInputStream fis = null;
+			InputStreamReader isl = null;
+			try {
+				fis = new FileInputStream("D:/TradeList.txt");
+				isl = new InputStreamReader(fis,"euc-kr");
+				BufferedReader br  =  new BufferedReader(isl);
+				int count =0;
+
+				while(true){
+					String list = br.readLine();
+					if(br.readLine()==null){
+						break;
+					}
+					String[] list_split = list.split("/");
+					for( i=0;i<6;i++){
+						list_split[i] = list_split[i].trim();
+					}
+					t.add(new Trade());
+					
+					t.get(count).date = list_split[0];
+					t.get(count).nation = list_split[1];
+					t.get(count).serial_num = (count+1);
+					t.get(count).exports = Integer.parseInt(list_split[2]);
+					t.get(count).export_sum = Integer.parseInt(list_split[3]);
+					t.get(count).imports = Integer.parseInt(list_split[4]);
+					t.get(count).import_sum = Integer.parseInt(list_split[5]);			
+					count++;
+				}
+				ta.append("txt파일에서 로드했습니다.\n");
+				
+
+				
+
+			 
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}	
+			
+			
+			
 		}
 		if(e.getSource() == menuItemOpendat){
+			FileInputStream fin = null;
+			ObjectInputStream ois = null;
+			try{
+				fin = new FileInputStream("TradeList.dat");
+				ois = new ObjectInputStream(fin);
+				
+				ArrayList t = (ArrayList)ois.readObject();
+				this.t = t;
+				ta.append("dat파일에서 로드했습니다.\n");
+			}
+			catch(Exception ex){
+				ta.append("error");
+			}
+			finally{
+				try{
+					
+					ois.close();
+					fin.close();
+				}
+				catch(IOException ioe){
+				}
+			}
 		}
 		if(e.getSource() == menuItemSavetxt){
 		}
 		if(e.getSource() == menuItemSavedat){
+
+			FileOutputStream fout = null;
+			ObjectOutputStream oos = null;
+	        try{
+	            fout = new FileOutputStream("TradeList.dat");
+	            oos = new ObjectOutputStream(fout);
+	            oos.writeObject(t);
+	            oos.reset();   
+	            ta.append("dat로 저장되었습니다\n");
+	            
+	        }
+	        catch(Exception ex){
+	        	ta.append("error");
+	        }
+	        finally{
+	            try{
+	                oos.close();
+	                fout.close();
+	            }
+	            catch(IOException ioe){
+	            	
+	            }
+	       }
+			
 		}
 		if(e.getSource() == menuItemExit){
 			System.exit(0);
