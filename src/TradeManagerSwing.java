@@ -9,6 +9,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -44,28 +46,6 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 	
 	ArrayList<Trade> t = new ArrayList<Trade>();
 	int i; //for문을 위한 변수
-	
-
-	
-	/*
-	    FileOutputStream fos = new FileOutputStream("D:/TradeList_output.txt");
-		OutputStreamWriter osw = new OutputStreamWriter(fos,"euc-kr");
-		BufferedWriter bw  =  new BufferedWriter(osw); 
-	*/
-	
-	
-	/*
-	    fout = new FileOutputStream("TradeData.dat");
-        oos = new ObjectOutputStream(fout);
-           
-        oos.writeObject(f);
-        oos.reset();
-            
-        System.out.println("저장되었습니다"); 
-        
-        
-	 
-	 */
 	
 	//swing 부분
 	JButton button1;
@@ -102,12 +82,12 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 		button2 = new JButton("2.무역정보 수정/삭제");
 		button3 = new JButton("3.무역정보 전체보기");
 		button4 = new JButton("4.무역정보 검색");
-		button5 = new JButton("5.그래프 보기");
-		button6 = new JButton("6.날짜별 파이그래프 ");	
+		button5 = new JButton("5.무역수지 그래프");
+		button6 = new JButton("6.항목별 파이그래프 ");	
 		clear_button = new JButton("CLEAR");
 		send_button = new JButton("Send");
 		ta = new TextArea("",39,98,TextArea.SCROLLBARS_VERTICAL_ONLY);
-		memo = new TextArea("",40,30,TextArea.SCROLLBARS_VERTICAL_ONLY);
+		memo = new TextArea("",39,30,TextArea.SCROLLBARS_VERTICAL_ONLY);
 		tf = new JTextField(20);
 		p1 = new JPanel();
 		p2 = new JPanel();
@@ -196,17 +176,19 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == button1){
-			Button1_Frame b1 = new Button1_Frame(MyFrame.this);
+			new Button1_Frame(MyFrame.this);
 		}
+		
 		if(e.getSource() == button2){
 			if(t.size() !=0){
-				Button2_Frame b2 = new Button2_Frame(MyFrame.this);
+				new Button2_Frame(MyFrame.this);
 			}
 			else{
 				ta.append("등록된 자료가 없습니다.\n");
 			}
 			
 		}
+		
 		if(e.getSource() == button3){
 			
 			if(t.size() !=0){
@@ -221,6 +203,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 			
 			
 		}
+		
 		if(e.getSource() == button4){
 			if(t.size() !=0){
 				ta.setText("");
@@ -242,6 +225,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 			}
 			
 		}
+		
 		if(e.getSource() == button6){
 			
 			if(t.size() !=0){
@@ -252,6 +236,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 			}
 			
 		}
+		
 		if(e.getSource() == send_button){
 			memo.append(tf.getText()+"\n");
 			tf.setText("");
@@ -269,38 +254,38 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 
 				while(true){
 					String list = br.readLine();
-					if(br.readLine()==null){
+					if(list!=null){
+						String[] list_split = list.split("/");
+						for( i=0;i<6;i++){
+							list_split[i] = list_split[i].trim();
+						}
+						t.add(new Trade());	
+						if(list_split[0].substring(5).length() ==1){
+							list_split[0]= "0"+list_split[0];
+						}
+
+						t.get(count).date = list_split[0];
+						t.get(count).nation = list_split[1];
+						t.get(count).serial_num = (count+1);
+						t.get(count).exports = Integer.parseInt(list_split[2]);
+						t.get(count).export_sum = Integer.parseInt(list_split[3]);
+						t.get(count).imports = Integer.parseInt(list_split[4]);
+						t.get(count).import_sum = Integer.parseInt(list_split[5]);			
+						count++;
+						
+					}
+					else{
 						break;
 					}
-					String[] list_split = list.split("/");
-					for( i=0;i<6;i++){
-						list_split[i] = list_split[i].trim();
-					}
-					t.add(new Trade());
 					
-					t.get(count).date = list_split[0];
-					t.get(count).nation = list_split[1];
-					t.get(count).serial_num = (count+1);
-					t.get(count).exports = Integer.parseInt(list_split[2]);
-					t.get(count).export_sum = Integer.parseInt(list_split[3]);
-					t.get(count).imports = Integer.parseInt(list_split[4]);
-					t.get(count).import_sum = Integer.parseInt(list_split[5]);			
-					count++;
 				}
-				ta.append("txt파일에서 로드했습니다.\n");
-				
-
-				
-
-			 
+				ta.append("txt파일에서 로드했습니다.\n"); 
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}	
-			
-			
-			
 		}
+		
 		if(e.getSource() == menuItemOpendat){
 			FileInputStream fin = null;
 			ObjectInputStream ois = null;
@@ -313,7 +298,6 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 				ta.append("dat파일에서 로드했습니다.\n");
 			}
 			catch(Exception ex){
-				ta.append("error");
 			}
 			finally{
 				try{
@@ -325,7 +309,37 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 				}
 			}
 		}
+		
 		if(e.getSource() == menuItemSavetxt){
+			FileOutputStream fos; 
+			OutputStreamWriter osw;
+			BufferedWriter bw;
+			try {
+				fos = new FileOutputStream("D:/TradeList_output.txt");
+				osw = new OutputStreamWriter(fos,"euc-kr");
+				bw  =  new BufferedWriter(osw);
+				for(i=0;i<t.size();i++){
+					bw.write(t.get(i).date+"/"+t.get(i).nation+"/"+t.get(i).exports+"/"+t.get(i).export_sum+"/"+t.get(i).imports+"/"+t.get(i).import_sum);
+					bw.newLine();
+				}
+				ta.append("txt파일로 저장했습니다.\n");
+				bw.close();
+				osw.close();
+				fos.close();
+
+				
+				
+				
+			} catch (IOException ioe) {
+				// TODO Auto-generated catch block
+				ioe.printStackTrace();
+			}
+
+			
+			
+			
+			
+			
 		}
 		if(e.getSource() == menuItemSavedat){
 
@@ -340,7 +354,6 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 	            
 	        }
 	        catch(Exception ex){
-	        	ta.append("error");
 	        }
 	        finally{
 	            try{
@@ -464,15 +477,22 @@ class Button1_Frame extends JDialog implements ActionListener, KeyListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == SEND){
-			Button1_Frame.this.MyFrame.t.add(new Trade());
-			Button1_Frame.this.MyFrame.t.get(this.MyFrame.t.size()-1).date = (tf1.getText()+"."+tf2.getText());
-			Button1_Frame.this.MyFrame.t.get(this.MyFrame.t.size()-1).nation = tf3.getText();
-			Button1_Frame.this.MyFrame.t.get(this.MyFrame.t.size()-1).exports = Integer.parseInt(tf4.getText());
-			Button1_Frame.this.MyFrame.t.get(this.MyFrame.t.size()-1).export_sum = Integer.parseInt(tf5.getText());
-			Button1_Frame.this.MyFrame.t.get(this.MyFrame.t.size()-1).imports = Integer.parseInt(tf6.getText());
-			Button1_Frame.this.MyFrame.t.get(this.MyFrame.t.size()-1).import_sum = Integer.parseInt(tf7.getText());
-			Button1_Frame.this.MyFrame.t.get(this.MyFrame.t.size()-1).serial_num = this.MyFrame.t.size();
-			Button1_Frame.this.dispose();//모달창 닫기             
+			MyFrame.t.add(new Trade());
+			MyFrame.t.get(MyFrame.t.size()-1).date = (tf1.getText()+"."+tf2.getText());
+			MyFrame.t.get(MyFrame.t.size()-1).nation = tf3.getText();
+			MyFrame.t.get(MyFrame.t.size()-1).exports = Integer.parseInt(tf4.getText());
+			MyFrame.t.get(MyFrame.t.size()-1).export_sum = Integer.parseInt(tf5.getText());
+			MyFrame.t.get(MyFrame.t.size()-1).imports = Integer.parseInt(tf6.getText());
+			MyFrame.t.get(MyFrame.t.size()-1).import_sum = Integer.parseInt(tf7.getText());
+			if(MyFrame.t.size()==1){
+				MyFrame.t.get(MyFrame.t.size()-1).serial_num = 1;
+			}
+			else{
+				MyFrame.t.get(MyFrame.t.size()-1).serial_num = MyFrame.t.get(MyFrame.t.size()-2).serial_num +1 ;
+			}
+			 
+			
+			dispose();
 			
 		}
 		if(e.getSource() == CLOSE){
@@ -494,7 +514,10 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener{
 	JLabel label7;
 	JLabel label8;
 	JLabel label9;
-	JTextField tf1;
+	JLabel label_year;
+	JLabel label_month;
+	JTextField year;
+	JTextField month;
 	JTextField tf2;
 	JTextField tf3;
 	JTextField tf4;
@@ -506,32 +529,34 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener{
 	JPanel p3;
 	JPanel p4;
 	JPanel p5;
+	JPanel p6;
 	JButton Edit;
 	JButton Delete;
 	JButton CLOSE;
+	JButton Search;
 	Choice nation_choice;
 	Choice date_choice;
 	HashSet<String> sample = new HashSet<String>();
 	HashSet<String> sample2 = new HashSet<String>();
 	public Button2_Frame(MyFrame MyFrame){
-		setTitle("Add Trade");
-		setSize(280,240);
+		setTitle("Edit Trade");
+		setSize(480,280);
 		this.MyFrame = MyFrame;
-
-		
-		
-		label1= new JLabel("날짜");
-		label2= new JLabel("년");
-		label3= new JLabel("월");
-		label4= new JLabel("상대국가");
+		label1= new JLabel("삭제");
+		label2= new JLabel("날짜");
+		label3= new JLabel("상대국가");
+		label4= new JLabel("일렬번호");
 		label5= new JLabel("수출건수");
 		label6= new JLabel("수출금액");
 		label7= new JLabel("수입건수");
 		label8= new JLabel("수입금액");
-		label9= new JLabel("　　　　　　　　　　단위:천불(USD 1,000)");
-		tf1 = new JTextField(4);
-		tf2 = new JTextField(2);
-		tf3 = new JTextField(7);
+		label9= new JLabel("　　　　　　　　　　　　　　　　　　　　　　　　단위:천불(USD 1,000)");
+		label_year = new JLabel("년");
+		label_month = new JLabel("월");
+		year = new JTextField(4);
+		month = new JTextField(2);
+		tf2 = new JTextField(8);
+		tf3 = new JTextField(10);
 		tf4 = new JTextField(5);
 		tf5 = new JTextField(5);
 		tf6 = new JTextField(5);
@@ -541,13 +566,15 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener{
 		p3 = new JPanel();
 		p4 = new JPanel();
 		p5 = new JPanel();
+		p6 = new JPanel();
 		Edit = new JButton("Edit");
 		Delete = new JButton("Delete");
 		CLOSE = new JButton("CLOSE");
+		Search = new JButton("SEARCH");
 		nation_choice = new Choice();
 		date_choice = new Choice();
-		
-		for(int i=0;i<this.MyFrame.t.size();i++){
+		/*
+		for(int i=0;i<this.MyFrame.t.size();i++){ //콤보박스 설정
 			sample.add(this.MyFrame.t.get(i).nation);
 		}
 		Iterator<String> iterator = sample.iterator();
@@ -556,7 +583,7 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener{
 			 nation_choice.add(nation);
 		}
 		
-		for(int i=0;i<this.MyFrame.t.size();i++){
+		for(int i=0;i<this.MyFrame.t.size();i++){ //콤보박스 설정
 			sample2.add(this.MyFrame.t.get(i).date);
 		}
 		 Iterator<String> iterator2 = sample2.iterator();
@@ -564,20 +591,45 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener{
 			 String date = iterator2.next();
 			 date_choice.add(date);
 		 }
-		
+		*/
+		 setLayout(new GridLayout(6,1));
+		 tf3.disable();
+		 p1.add(label2);
+		 p1.add(label_year);
+		 p1.add(year);
+		 p1.add(label_month);
+		 p1.add(month);
+		 p1.add(label3);
+		 p1.add(tf2);
+		 p1.add(Search);
+		 add(p1,0);
 		 
+		 p2.add(label4);
+		 p2.add(tf3);
+		 p2.add(Delete);
+		 add(p2,1);
 		 
-
-		add(p1,0);
-		add(p2,1);
-		add(p3,2);	
-		add(p4,3);	
-		add(date_choice,4);	
-		add(nation_choice,5);
+		 p3.add(label5);
+		 p3.add(tf4);
+		 p3.add(label6);
+		 p3.add(tf5);
+		 p4.add(label7);
+		 p4.add(tf6);
+		 p4.add(label8);
+		 p4.add(tf7);
+		 add(p3,2);
+		 add(p4,3);
+		 
+		 p5.add(label9);
+		 add(p5,4);
+		 p6.add(Edit);
+		 p6.add(CLOSE);
+		 add(p6,5);
 		setVisible(true);
 		Edit.addActionListener(this);
 		Delete.addActionListener(this);
 		CLOSE.addActionListener(this);
+		Search.addActionListener(this);
 	}
 	
 
@@ -599,13 +651,39 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == Edit){           
-			
+			MyFrame.t.get(Integer.parseInt((tf3.getText()))-1).exports = Integer.parseInt(tf4.getText());
+			MyFrame.t.get(Integer.parseInt((tf3.getText()))-1).export_sum = Integer.parseInt(tf5.getText());
+			MyFrame.t.get(Integer.parseInt((tf3.getText()))-1).imports = Integer.parseInt(tf6.getText());
+			MyFrame.t.get(Integer.parseInt((tf3.getText()))-1).import_sum = Integer.parseInt(tf7.getText());
+			MyFrame.ta.append(MyFrame.t.get(Integer.parseInt((tf3.getText()))-1).serial_num+"번 자료가 수정되었습니다.");
+			dispose();
 		}
-		if(e.getSource() == Delete){           
+		if(e.getSource() == Delete){      
+			MyFrame.t.remove(Integer.parseInt((tf3.getText()))-1);
+			MyFrame.ta.append(tf3.getText()+"번 자료가 삭제되었습니다.");
+			dispose();
 			
 		}
 		if(e.getSource() == CLOSE){
 			dispose();
+		}
+		if(e.getSource() == Search){
+			tf3.setText("");
+			int find =-1;
+			String date = year.getText() +"."+month.getText();
+			System.out.println(date);
+			for(int i =0 ;i<MyFrame.t.size();i++){
+				if(MyFrame.t.get(i).date.equals(date) && MyFrame.t.get(i).nation.equals(tf2.getText())){
+					tf3.setText(MyFrame.t.get(i).serial_num+"");
+					
+					find=1;
+				}
+			}
+			if(find== -1){
+				tf3.setText("존재하지 않습니다.");
+			}
+			
+			
 		}
 
 	}
