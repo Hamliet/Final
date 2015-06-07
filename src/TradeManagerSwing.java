@@ -206,7 +206,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 		if(e.getSource() == button4){
 			if(t.size() !=0){
 
-				Button4_Frame b4 = new Button4_Frame(MyFrame.this);
+				new Button4_Frame(MyFrame.this);
 			}
 			else{
 				ta.append("등록된 자료가 없습니다.\n");
@@ -217,7 +217,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 		if(e.getSource() == button5){
 			
 			if(t.size() !=0){
-				Button5_Frame b5 = new Button5_Frame(MyFrame.this);
+				new Button5_Frame(MyFrame.this);
 			}
 			else{
 				ta.append("등록된 자료가 없습니다.\n");
@@ -228,7 +228,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 		if(e.getSource() == button6){
 			
 			if(t.size() !=0){
-				Button5_Frame b6 = new Button5_Frame(MyFrame.this);
+				new Button6_Frame(MyFrame.this);
 			}
 			else{
 				ta.append("등록된 자료가 없습니다.\n");
@@ -278,7 +278,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 					}
 					
 				}
-				ta.append("txt파일에서 로드했습니다.\n"); 
+				ta.append("텍스트 파일에서 로드했습니다.\n"); 
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -321,7 +321,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener, FocusListen
 					bw.write(t.get(i).date+"/"+t.get(i).nation+"/"+t.get(i).exports+"/"+t.get(i).export_sum+"/"+t.get(i).imports+"/"+t.get(i).import_sum);
 					bw.newLine();
 				}
-				ta.append("txt파일로 저장했습니다.\n");
+				ta.append("텍스트 파일로 저장했습니다.\n");
 				bw.close();
 				osw.close();
 				fos.close();
@@ -669,12 +669,15 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener{
 		if(e.getSource() == Search){
 			tf3.setText("");
 			int find =-1;
-			String date = year.getText() +"."+month.getText();
-			System.out.println(date);
+			String s_year = year.getText();
+			String s_month = month.getText();
+			if(s_month.length()<2){ //날짜입력 유연성 확보
+				s_month= "0"+s_month;
+			}
+			String date = s_year+"."+s_month;
 			for(int i =0 ;i<MyFrame.t.size();i++){
 				if(MyFrame.t.get(i).date.equals(date) && MyFrame.t.get(i).nation.equals(tf2.getText())){
 					tf3.setText(MyFrame.t.get(i).serial_num+"");
-					
 					find=1;
 				}
 			}
@@ -721,7 +724,7 @@ class Button4_Frame extends JDialog implements ActionListener, KeyListener{
 
 	public Button4_Frame(MyFrame MyFrame){
 		this.MyFrame = MyFrame;
-		setTitle("Add Trade");
+		setTitle("Find Trade");
 		setSize(340,240);
 		this.MyFrame = MyFrame;
 		label1= new JLabel("기간");
@@ -844,15 +847,21 @@ class Button4_Frame extends JDialog implements ActionListener, KeyListener{
 					String s2= tf2.getText();
 					String s3= tf3.getText();
 					String s4= tf4.getText();
-					if(s2.length()==1){ //날짜입력 유용성 확보
+					if(s1.length()==0){ //parseInt시 null값 방지
 						s1= "0"+s1;
 					}
-					if(s4.length()==1){ //날짜입력 유용성 확보
+					if(s2.length()<2){ //날짜입력 유연성 확보, parseInt시 null값 방지
+						s2= "0"+s2;
+					}
+					if(s3.length()==0){ //parseInt시 null값 방지
+						s3= "0"+s3;
+					}
+					if(s4.length()<2){ //날짜입력 유연성 확보, parseInt시 null값 방지
 						s4="0"+s4;
 					}
 					int s_date = Integer.parseInt(s1+s2);
 					int e_date = Integer.parseInt(s3+s4);
-					if(e_date<s_date || Integer.parseInt(tf1.getText())>9999 || Integer.parseInt(tf1.getText())>9999 ||Integer.parseInt(tf2.getText())>12 || Integer.parseInt(tf4.getText()) >12){
+					if(e_date<s_date || Integer.parseInt(s1)>9999 || Integer.parseInt(s3)>9999 ||Integer.parseInt(s2)>12 || Integer.parseInt(s4) >12){
 						MyFrame.ta.append("기간을 올바르게 입력하지 않았습니다.\n");
 					}
 					else{
