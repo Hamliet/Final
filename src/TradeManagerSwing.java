@@ -73,9 +73,11 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 	JButton button1;
 	JButton button2;
 	JButton button3;
+	JButton button3_;
 	JButton button4;
 	JButton button5;
 	JButton button6;
+	
 	JButton send_button;
 	JButton clear_button;
 	TextArea ta;
@@ -98,11 +100,12 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 
 	public MyFrame() { // 생성자
 		setTitle("Trade Manager");
-		setSize(980, 760);
+		setSize(1025, 760);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		button1 = new JButton("1.새 무역정보 추가");
+		button1 = new JButton("1.무역정보 추가");
 		button2 = new JButton("2.무역정보 수정/삭제");
 		button3 = new JButton("3.무역정보 전체보기");
+		button3_ = new JButton("3-2.국가별 통계");
 		button4 = new JButton("4.무역정보 검색");
 		button5 = new JButton("5.무역수지 그래프");
 		button6 = new JButton("6.항목별 파이그래프 ");
@@ -142,6 +145,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		button1.addActionListener(this);
 		button2.addActionListener(this);
 		button3.addActionListener(this);
+		button3_.addActionListener(this);
 		button4.addActionListener(this);
 		button5.addActionListener(this);
 		button6.addActionListener(this);
@@ -154,6 +158,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		p2.add(button1);
 		p2.add(button2);
 		p2.add(button3);
+		p2.add(button3_);
 		p2.add(button4);
 		p2.add(button5);
 		p2.add(button6);
@@ -248,9 +253,19 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		if (e.getSource() == button3) {
 
 			if (t.size() != 0) {
-				ta.setText("");
 				for (i = 0; i < t.size(); i++) {
 					ta.append(t.get(i).toString());
+				}
+			} else {
+				ta.append("등록된 자료가 없습니다.\n");
+			}
+
+		}
+		if (e.getSource() == button3_) {
+			set_Nations();
+			if (t.size() != 0) {
+				for (i = 0; i < n.size(); i++) {
+					ta.append(n.get(i).toString());
 				}
 			} else {
 				ta.append("등록된 자료가 없습니다.\n");
