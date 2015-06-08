@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Choice;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.TextArea;
 import java.awt.event.ActionEvent;
@@ -32,6 +33,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+
+
 //차트부분 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -42,10 +45,13 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.general.PieDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 
@@ -60,6 +66,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		FocusListener {
 
 	ArrayList<Trade> t = new ArrayList<Trade>();
+	ArrayList<Nations> n = new ArrayList<Nations>();
 	int i; // for문을 위한 변수
 
 	// swing 부분
@@ -155,8 +162,43 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		add(p2, BorderLayout.NORTH);
 		add(p1, BorderLayout.SOUTH);
 		add(p3, BorderLayout.CENTER);
+		
 
 		setVisible(true);
+	}
+
+
+	public void set_Nations(){
+		n.clear();
+		
+		
+		HashSet<String> sample = new HashSet<String>(); //총 나라의 수를 구하기
+		for (int i = 0; i < t.size(); i++) { 
+			sample.add(t.get(i).nation);
+		}
+		for(int j=0;j<sample.size();j++){ //총 나라의 수만큼 Nations ArrayList생성
+			n.add(new Nations());
+		}
+		
+		int k=0;
+		Iterator<String> iterator = sample.iterator();
+		while (iterator.hasNext()) {
+			String nation = iterator.next();
+			n.get(k).name=nation;
+			k++;
+		}
+		
+		for(int j=0;j<n.size();j++){
+			for(i=0;i<t.size();i++){
+				if(t.get(i).nation.equals(n.get(j).name)){
+					n.get(j).total_exports += t.get(i).exports;
+					n.get(j).total_export_sum += t.get(i).export_sum;
+					n.get(j).total_imports += t.get(i).imports;
+					n.get(j).total_import_sum += t.get(i).import_sum;
+					
+				}
+			}	
+		}		
 	}
 
 	@Override
@@ -239,7 +281,15 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		if (e.getSource() == button6) {
 
 			if (t.size() != 0) {
-				new Button6_Frame(MyFrame.this);
+				new Button6_Select_Frame(MyFrame.this);
+				/*
+				Button6_Frame b6 = new Button6_Frame(MyFrame.this);
+		        b6.pack();
+		        RefineryUtilities.centerFrameOnScreen(b6);
+		        b6.setVisible(true);
+				 */
+				
+				
 			} else {
 				ta.append("등록된 자료가 없습니다.\n");
 			}
@@ -535,10 +585,7 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener {
 	JButton Delete;
 	JButton CLOSE;
 	JButton Search;
-	Choice nation_choice;
-	Choice date_choice;
-	HashSet<String> sample = new HashSet<String>();
-	HashSet<String> sample2 = new HashSet<String>();
+
 
 	public Button2_Frame(MyFrame MyFrame) {
 		setTitle("Edit Trade");
@@ -573,8 +620,7 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener {
 		Delete = new JButton("Delete");
 		CLOSE = new JButton("CLOSE");
 		Search = new JButton("SEARCH");
-		nation_choice = new Choice();
-		date_choice = new Choice();
+
 		/*
 		 * for(int i=0;i<this.MyFrame.t.size();i++){ //콤보박스 설정
 		 * sample.add(this.MyFrame.t.get(i).nation); } Iterator<String> iterator
@@ -975,10 +1021,10 @@ class Button5_Frame extends JDialog {
 
 	private CategoryDataset createDataset() {
 
-		// row keys...
+		// row keys
 		final String series1 = "Total Trade Balance";
 
-		// column keys...
+		// column keys
 		final String type1 = "2000";
 		final String type2 = "2001";
 		final String type3 = "2002";
@@ -995,7 +1041,7 @@ class Button5_Frame extends JDialog {
 		final String type14 = "2013";
 		final String type15 = "2014";
 		final String type16 = "2015";
-		// create the dataset...
+		// create the dataset
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
 		
@@ -1173,14 +1219,6 @@ class Button5_Frame extends JDialog {
 
 	}
 
-	/**
-	 * Creates a sample chart.
-	 * 
-	 * @param dataset
-	 *            a dataset.
-	 * 
-	 * @return The chart.
-	 */
 	private JFreeChart createChart(final CategoryDataset dataset) {
 
 		// create the chart...
@@ -1190,7 +1228,7 @@ class Button5_Frame extends JDialog {
 				"Value", // range axis label
 				dataset, // data
 				PlotOrientation.VERTICAL, // orientation
-				true, // include legend
+				false, // include legend
 				true, // tooltips
 				false // urls
 				);
@@ -1208,25 +1246,11 @@ class Button5_Frame extends JDialog {
 		plot.setBackgroundPaint(Color.lightGray);
 		plot.setRangeGridlinePaint(Color.white);
 
-		// customise the range axis...
+		// customise the range axis
 		final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 		rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		rangeAxis.setAutoRangeIncludesZero(true);
 
-		// ****************************************************************************
-		// * JFREECHART DEVELOPER GUIDE *
-		// * The JFreeChart Developer Guide, written by David Gilbert, is
-		// available *
-		// * to purchase from Object Refinery Limited: *
-		// * *
-		// * http://www.object-refinery.com/jfreechart/guide.html *
-		// * *
-		// * Sales are used to provide funding for the JFreeChart project -
-		// please *
-		// * support us so that we can continue developing free software. *
-		// ****************************************************************************
-
-		// customise the renderer...
 		final LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot
 				.getRenderer();
 		// renderer.setDrawShapes(true);
@@ -1248,7 +1272,7 @@ class Button5_Frame extends JDialog {
 }
 
 class Button5_Select_Frame extends JDialog implements ActionListener, KeyListener {
-	MyFrame MyFrame;
+	static MyFrame MyFrame;
 	JLabel label1;
 	Choice nation_choice;
 	HashSet<String> sample = new HashSet<String>();
@@ -1333,10 +1357,248 @@ class Button5_Select_Frame extends JDialog implements ActionListener, KeyListene
 }
 
 class Button6_Frame extends JDialog implements ActionListener, KeyListener {
-	MyFrame MyFrame;
-
-	public Button6_Frame(MyFrame MyFrame) {
+	static MyFrame MyFrame;
+	static String key;
+	static String [] nation_sample;
+	
+	public Button6_Frame(MyFrame MyFrame,String key, String before_split){
+		setTitle("Pie Chart");
 		this.MyFrame = MyFrame;
+		this.key = key;
+		nation_sample = before_split.split(" ");
+		setContentPane(createDemoPanel());
+	}
+
+
+    /**
+     * Creates a sample dataset.
+     * 
+     * @return A sample dataset.
+     */
+    private static PieDataset createDataset() {
+    	int all=-1;
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        MyFrame.set_Nations();
+        for(int j=0;j<nation_sample.length;j++){
+        	if(nation_sample[j].equals("전체")){
+        		all=1;
+        	}
+        	
+        }
+
+
+        if(key.equals("수출량")){
+        	if(all==1){
+        		for(int i=0;i<MyFrame.n.size();i++){
+        			dataset.setValue(MyFrame.n.get(i).name, MyFrame.n.get(i).total_exports);
+        		}	
+        		
+        	}
+        	else{
+        		for(int i=0;i<MyFrame.n.size();i++){
+            		for(int j=0;j<nation_sample.length;j++){
+            			if(nation_sample[j].equals(MyFrame.n.get(i).name)){
+            				dataset.setValue(MyFrame.n.get(i).name, MyFrame.n.get(i).total_exports);
+            			}
+            		}
+            		//System.out.println(MyFrame.n.get(i).total_exports);
+            		
+            	} 	
+        	}
+        	
+        		
+        }
+        else if(key.equals("수출금액")){
+        	if(all==1){
+        		for(int i=0;i<MyFrame.n.size();i++){
+        			dataset.setValue(MyFrame.n.get(i).name, MyFrame.n.get(i).total_export_sum);
+        		}	
+
+        	}
+        	else{
+        		for(int i=0;i<MyFrame.n.size();i++){
+            		for(int j=0;j<nation_sample.length;j++){
+            			if(nation_sample[j].equals(MyFrame.n.get(i).name)){
+            				dataset.setValue(MyFrame.n.get(i).name, MyFrame.n.get(i).total_export_sum);
+            			}
+            		}
+            	}
+        	}
+        	
+        	
+        }
+        else if(key.equals("수입량")){
+        	if(all==1){
+        		for(int i=0;i<MyFrame.n.size();i++){
+        			dataset.setValue(MyFrame.n.get(i).name, MyFrame.n.get(i).total_imports);
+        		}	
+        		
+        	}
+        	else{
+            	for(int i=0;i<MyFrame.n.size();i++){
+            		for(int j=0;j<nation_sample.length;j++){
+            			if(nation_sample[j].equals(MyFrame.n.get(i).name)){
+            				dataset.setValue(MyFrame.n.get(i).name, MyFrame.n.get(i).total_imports);
+            			}
+            		}
+            		
+            	}
+        	}
+
+        	
+        }
+        else if(key.equals("수입금액")){
+        	if(all==1){
+        		for(int i=0;i<MyFrame.n.size();i++){
+        			dataset.setValue(MyFrame.n.get(i).name, MyFrame.n.get(i).total_import_sum);
+        		}	
+        	}
+        	else{
+        		for(int i=0;i<MyFrame.n.size();i++){
+            		for(int j=0;j<nation_sample.length;j++){
+            			if(nation_sample[j].equals(MyFrame.n.get(i).name)){
+            				dataset.setValue(MyFrame.n.get(i).name, MyFrame.n.get(i).total_import_sum);
+            			}
+            		}
+            	
+            		
+            	}
+        	}
+        	
+        	
+        }
+
+        return dataset;   
+ }
+    
+
+    private static JFreeChart createChart(PieDataset dataset) {
+        
+        JFreeChart chart = ChartFactory.createPieChart(
+            "",  // chart title
+            dataset,             // data
+            false,               // include legend
+            true,
+            false
+        );
+
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
+        plot.setNoDataMessage("No data available");
+        plot.setCircular(false);
+        plot.setLabelGap(0.02);
+        return chart;
+        
+    }
+    
+    /**
+     * Creates a panel for the demo (used by SuperDemo.java).
+     * 
+     * @return A panel.
+     */
+    public static JPanel createDemoPanel() {
+        JFreeChart chart = createChart(createDataset());
+        return new ChartPanel(chart);
+    }
+    
+
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}
+
+class Button6_Select_Frame extends JDialog implements ActionListener, KeyListener {
+	MyFrame MyFrame;
+	JLabel label1;
+	JLabel label2;
+	JLabel label3;
+	Choice legend_choice;
+	Choice nation_choice;
+	JTextArea ta;
+	JButton Add;
+	JButton Search;
+	JButton CLOSE;
+	JPanel p1;
+	JPanel p2;
+	JPanel p3;
+	JPanel p4;
+	int all = -1;
+	HashSet<String> sample = new HashSet<String>();
+	public Button6_Select_Frame(MyFrame MyFrame) {
+		this.MyFrame = MyFrame;
+		setTitle("Select Legend");
+		setSize(500,220);
+		label1 = new JLabel("범례설정");
+		label2 = new JLabel("국가선택");
+		label3 = new JLabel("검색대상");
+		legend_choice = new Choice();
+		Add = new JButton("Add");
+		Search = new JButton("Search");
+		CLOSE = new JButton("CLOSE");
+		p1 = new JPanel();
+		p2 = new JPanel();
+		p3 = new JPanel();
+		p4 = new JPanel();
+		legend_choice.add("수출량");
+		legend_choice.add("수출금액");
+		legend_choice.add("수입량");
+		legend_choice.add("수입금액");
+		ta = new JTextArea();
+		ta.disable();
+		nation_choice = new Choice();
+		for (int i = 0; i < this.MyFrame.t.size(); i++) { // 콤보박스 설정
+			sample.add(this.MyFrame.t.get(i).nation);
+		}
+		Iterator<String> iterator = sample.iterator();
+		nation_choice.add("전체");
+		while (iterator.hasNext()) {
+			String nation = iterator.next();
+			nation_choice.add(nation);
+		}
+		Add.addActionListener(this);
+		Search.addActionListener(this);
+		CLOSE.addActionListener(this);
+		setLayout(new GridLayout(3,1));
+		
+		p1.add(label1);
+		p1.add(legend_choice);
+		p1.add(label2);
+		p1.add(nation_choice);
+		p1.add(Add);
+		p3.setLayout(new BorderLayout());
+		p3.add(label3,"West");
+		p3.add(ta,"Center");
+		p4.add(Search);
+		p4.add(CLOSE);	
+		add(p1,0);
+		add(p3,1);
+		add(p4,2);
+		setVisible(true);
 	}
 
 	@Override
@@ -1356,6 +1618,48 @@ class Button6_Frame extends JDialog implements ActionListener, KeyListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == Add){
+			if (e.getSource() == Add && all == -1) {
+				String choosen = nation_choice.getSelectedItem().toString();
+				if (choosen.equals("전체")) { // 전체가 선택되면 비활성화
+					all = 1;
+				}
+				nation_choice.remove(nation_choice.getSelectedIndex());
+				ta.append(choosen + " ");
+			}
+		}
+		if(e.getSource() == Search){
+			if (ta.getText().length() == 0) {
+				MyFrame.ta.append("국가를 선택하지 않았습니다."); // 국가선택을 안했을 경우
+			}
+			else{
+				String key = null;
+				if(legend_choice.getSelectedItem().equals("수출량")){
+					key="수출량";
+				}
+				else if(legend_choice.getSelectedItem().equals("수출금액")){
+					key="수출금액";
+				}
+				else if(legend_choice.getSelectedItem().equals("수입량")){
+					key="수입량";
+				}
+				else if(legend_choice.getSelectedItem().equals("수입금액")){
+					key="수입금액";
+				}
+				
+				Button6_Frame b6 = new Button6_Frame(MyFrame,key,ta.getText());
+				b6.nation_sample = ta.getText().split(" ");
+		        b6.pack();
+		        RefineryUtilities.centerFrameOnScreen(b6);
+		        b6.setVisible(true);
+			}
+			dispose();
+			
+		}
+
+		if(e.getSource() == CLOSE){
+			dispose();
+		}
 
 	}
 
