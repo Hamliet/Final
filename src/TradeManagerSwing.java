@@ -228,15 +228,12 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 
 		if (e.getSource() == button5) {
 
+	
 			if (t.size() != 0) {
-				Button5_Frame b5 = new Button5_Frame(MyFrame.this);
-				b5.pack();
-				RefineryUtilities.centerFrameOnScreen(b5);
-				b5.setVisible(true);
+				new Button5_Select_Frame(MyFrame.this);
 			} else {
 				ta.append("등록된 자료가 없습니다.\n");
 			}
-
 		}
 
 		if (e.getSource() == button6) {
@@ -951,9 +948,11 @@ class Button4_Frame extends JDialog implements ActionListener, KeyListener {
 
 class Button5_Frame extends JDialog {
 	MyFrame MyFrame;
+	String nations;
 
 	public Button5_Frame(MyFrame MyFrame) {
 		this.MyFrame = MyFrame;
+		nations = null;
 		setTitle("Total Trade Balance");
 		CategoryDataset dataset = createDataset();
 		JFreeChart chart = createChart(dataset);
@@ -961,6 +960,18 @@ class Button5_Frame extends JDialog {
 		chartPanel.setPreferredSize(new Dimension(700, 470));
 		setContentPane(chartPanel);
 	}
+	public Button5_Frame(MyFrame MyFrame, String nations) {
+		this.MyFrame = MyFrame;
+		this.nations = nations;
+		setTitle("Total Trade Balance");
+		CategoryDataset dataset = createDataset();
+		JFreeChart chart = createChart(dataset);
+		ChartPanel chartPanel = new ChartPanel(chart);
+		chartPanel.setPreferredSize(new Dimension(700, 470));
+		setContentPane(chartPanel);
+	}
+	
+	
 
 	private CategoryDataset createDataset() {
 
@@ -995,71 +1006,143 @@ class Button5_Frame extends JDialog {
 			import_sum_year [i] = 0;
 			export_sum_year [i] = 0;
 		}
+
 		for(int i=0;i<MyFrame.t.size();i++){
-			if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2000){		
-				export_sum_year [0] += MyFrame.t.get(i).export_sum;
-				import_sum_year [0] += MyFrame.t.get(i).import_sum;	
+			if(MyFrame.t.get(i).nation.equals(nations)){
+				if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2000){		
+					export_sum_year [0] += MyFrame.t.get(i).export_sum;
+					import_sum_year [0] += MyFrame.t.get(i).import_sum;	
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2001){
+					export_sum_year [1] += MyFrame.t.get(i).export_sum;
+					import_sum_year [1] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2002){
+					export_sum_year [2] += MyFrame.t.get(i).export_sum;
+					import_sum_year [2] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2003){
+					export_sum_year [3] += MyFrame.t.get(i).export_sum;
+					import_sum_year [3] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2004){
+					export_sum_year [4] += MyFrame.t.get(i).export_sum;
+					import_sum_year [4] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2005){
+					export_sum_year [5] += MyFrame.t.get(i).export_sum;
+					import_sum_year [5] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2006){
+					export_sum_year [6] += MyFrame.t.get(i).export_sum;
+					import_sum_year [6] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2007){
+					export_sum_year [7] += MyFrame.t.get(i).export_sum;
+					import_sum_year [7] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2008){
+					export_sum_year [8] += MyFrame.t.get(i).export_sum;
+					import_sum_year [8] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2009){
+					export_sum_year [9] += MyFrame.t.get(i).export_sum;
+					import_sum_year [9] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2010){
+					export_sum_year [10] += MyFrame.t.get(i).export_sum;
+					import_sum_year [10] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2011){
+					export_sum_year [11] += MyFrame.t.get(i).export_sum;
+					import_sum_year [11] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2012){
+					export_sum_year [12] += MyFrame.t.get(i).export_sum;
+					import_sum_year [12] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2013){
+					export_sum_year [13] += MyFrame.t.get(i).export_sum;
+					import_sum_year [13] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2014){
+					export_sum_year [14] += MyFrame.t.get(i).export_sum;
+					import_sum_year [14] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2015){
+					export_sum_year [15] += MyFrame.t.get(i).export_sum;
+					import_sum_year [15] += MyFrame.t.get(i).import_sum;
+				}
 			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2001){
-				export_sum_year [1] += MyFrame.t.get(i).export_sum;
-				import_sum_year [1] += MyFrame.t.get(i).import_sum;
+			else if(nations == null || nations.equals("Korea")){
+				nations = "Korea";
+				if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2000){		
+					export_sum_year [0] += MyFrame.t.get(i).export_sum;
+					import_sum_year [0] += MyFrame.t.get(i).import_sum;	
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2001){
+					export_sum_year [1] += MyFrame.t.get(i).export_sum;
+					import_sum_year [1] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2002){
+					export_sum_year [2] += MyFrame.t.get(i).export_sum;
+					import_sum_year [2] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2003){
+					export_sum_year [3] += MyFrame.t.get(i).export_sum;
+					import_sum_year [3] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2004){
+					export_sum_year [4] += MyFrame.t.get(i).export_sum;
+					import_sum_year [4] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2005){
+					export_sum_year [5] += MyFrame.t.get(i).export_sum;
+					import_sum_year [5] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2006){
+					export_sum_year [6] += MyFrame.t.get(i).export_sum;
+					import_sum_year [6] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2007){
+					export_sum_year [7] += MyFrame.t.get(i).export_sum;
+					import_sum_year [7] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2008){
+					export_sum_year [8] += MyFrame.t.get(i).export_sum;
+					import_sum_year [8] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2009){
+					export_sum_year [9] += MyFrame.t.get(i).export_sum;
+					import_sum_year [9] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2010){
+					export_sum_year [10] += MyFrame.t.get(i).export_sum;
+					import_sum_year [10] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2011){
+					export_sum_year [11] += MyFrame.t.get(i).export_sum;
+					import_sum_year [11] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2012){
+					export_sum_year [12] += MyFrame.t.get(i).export_sum;
+					import_sum_year [12] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2013){
+					export_sum_year [13] += MyFrame.t.get(i).export_sum;
+					import_sum_year [13] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2014){
+					export_sum_year [14] += MyFrame.t.get(i).export_sum;
+					import_sum_year [14] += MyFrame.t.get(i).import_sum;
+				}
+				else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2015){
+					export_sum_year [15] += MyFrame.t.get(i).export_sum;
+					import_sum_year [15] += MyFrame.t.get(i).import_sum;
+				}
 			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2002){
-				export_sum_year [2] += MyFrame.t.get(i).export_sum;
-				import_sum_year [2] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2003){
-				export_sum_year [3] += MyFrame.t.get(i).export_sum;
-				import_sum_year [3] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2004){
-				export_sum_year [4] += MyFrame.t.get(i).export_sum;
-				import_sum_year [4] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2005){
-				export_sum_year [5] += MyFrame.t.get(i).export_sum;
-				import_sum_year [5] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2006){
-				export_sum_year [6] += MyFrame.t.get(i).export_sum;
-				import_sum_year [6] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2007){
-				export_sum_year [7] += MyFrame.t.get(i).export_sum;
-				import_sum_year [7] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2008){
-				export_sum_year [8] += MyFrame.t.get(i).export_sum;
-				import_sum_year [8] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2009){
-				export_sum_year [9] += MyFrame.t.get(i).export_sum;
-				import_sum_year [9] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2010){
-				export_sum_year [10] += MyFrame.t.get(i).export_sum;
-				import_sum_year [10] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2011){
-				export_sum_year [11] += MyFrame.t.get(i).export_sum;
-				import_sum_year [11] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2012){
-				export_sum_year [12] += MyFrame.t.get(i).export_sum;
-				import_sum_year [12] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2013){
-				export_sum_year [13] += MyFrame.t.get(i).export_sum;
-				import_sum_year [13] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2014){
-				export_sum_year [14] += MyFrame.t.get(i).export_sum;
-				import_sum_year [14] += MyFrame.t.get(i).import_sum;
-			}
-			else if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2015){
-				export_sum_year [15] += MyFrame.t.get(i).export_sum;
-				import_sum_year [15] += MyFrame.t.get(i).import_sum;
-			}
+			
+			
 			
 		}
 
@@ -1102,12 +1185,12 @@ class Button5_Frame extends JDialog {
 
 		// create the chart...
 		final JFreeChart chart = ChartFactory.createLineChart(
-				"Korea Trade Balance", // title
+				"Trade Balance", // title
 				"Year", // domain axis label
 				"Value", // range axis label
 				dataset, // data
 				PlotOrientation.VERTICAL, // orientation
-				false, // include legend
+				true, // include legend
 				true, // tooltips
 				false // urls
 				);
@@ -1160,6 +1243,91 @@ class Button5_Frame extends JDialog {
 		// OPTIONAL CUSTOMISATION COMPLETED.
 
 		return chart;
+	}
+
+}
+
+class Button5_Select_Frame extends JDialog implements ActionListener, KeyListener {
+	MyFrame MyFrame;
+	JLabel label1;
+	Choice nation_choice;
+	HashSet<String> sample = new HashSet<String>();
+	JButton Search;
+	JButton CLOSE;
+	JPanel p1;
+	JPanel p2;
+	 
+	public Button5_Select_Frame(MyFrame MyFrame) {
+		this.MyFrame = MyFrame;
+		setTitle("Select Nation");
+		setSize(300,140);
+		label1 = new JLabel("대상국가");
+		nation_choice = new Choice();
+		Search = new JButton("Search");
+		CLOSE = new JButton("CLOSE");
+		p1 = new JPanel();
+		p2 = new JPanel();
+		
+		for(int i=0;i<this.MyFrame.t.size();i++){ //콤보박스 설정
+			sample.add(this.MyFrame.t.get(i).nation); 
+		} Iterator<String> iterator = sample.iterator(); 
+		nation_choice.add("전체");
+		while(iterator.hasNext()){ 
+			 String nation =	 iterator.next();
+			 nation_choice.add(nation); 
+		}
+		Search.addActionListener(this);
+		CLOSE.addActionListener(this);
+		setLayout(new GridLayout(2,1));
+		
+		p1.add(label1);
+		p1.add(nation_choice);
+		p2.add(Search);
+		p2.add(CLOSE);	
+		add(p1,0);
+		add(p2,1);
+		setVisible(true);
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == Search){
+			if(nation_choice.getSelectedItem().equals("전체")){
+				Button5_Frame b5 = new Button5_Frame(MyFrame);
+				b5.pack();
+				RefineryUtilities.centerFrameOnScreen(b5);
+				b5.setVisible(true);
+
+			}
+			else{
+				String nation = nation_choice.getSelectedItem();
+				Button5_Frame b5 = new Button5_Frame(MyFrame,nation);
+				b5.pack();
+				RefineryUtilities.centerFrameOnScreen(b5);
+				b5.setVisible(true);
+			}
+			dispose();
+			
+		}
+		if(e.getSource() == CLOSE){
+			dispose();
+		}
+
 	}
 
 }
