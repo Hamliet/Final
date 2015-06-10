@@ -1,5 +1,9 @@
+//차트부분 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.TextArea;
@@ -11,6 +15,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,6 +29,7 @@ import java.util.Iterator;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -32,13 +38,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-
-
-
-//차트부분 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -52,7 +52,6 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
-import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 
 public class TradeManagerSwing {
@@ -90,12 +89,8 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 	JPanel p5;
 	JMenuBar mb;
 	JMenu menuFile;
-	JMenu menuFileOpen;
-	JMenuItem menuItemOpentxt;
-	JMenuItem menuItemOpendat;
-	JMenu menuFileSave;
-	JMenuItem menuItemSavetxt;
-	JMenuItem menuItemSavedat;
+	JMenuItem menuItemOpen;
+	JMenuItem menuItemSave;
 	JMenuItem menuItemExit;
 
 	public MyFrame() { // 생성자
@@ -121,26 +116,16 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		p5 = new JPanel();
 		mb = new JMenuBar();
 		menuFile = new JMenu("File");
-		menuFileOpen = new JMenu("Open");
-		menuItemOpentxt = new JMenuItem("txt");
-		menuItemOpendat = new JMenuItem("dat");
-		menuFileSave = new JMenu("Save");
-		menuItemSavetxt = new JMenuItem("txt");
-		menuItemSavedat = new JMenuItem("dat");
+		menuItemOpen = new JMenuItem("Open");
+		menuItemSave = new JMenuItem("Save");
 		menuItemExit = new JMenuItem("Exit");
-		menuFileOpen.add(menuItemOpentxt);
-		menuFileOpen.add(menuItemOpendat);
-		menuFile.add(menuFileOpen);
-		menuFileSave.add(menuItemSavetxt);
-		menuFileSave.add(menuItemSavedat);
-		menuFile.add(menuFileSave);
+		menuFile.add(menuItemOpen);
+		menuFile.add(menuItemSave);
 		menuFile.add(menuItemExit);
 		mb.add(menuFile);
 		setJMenuBar(mb);
-		menuItemOpentxt.addActionListener(this);
-		menuItemOpendat.addActionListener(this);
-		menuItemSavetxt.addActionListener(this);
-		menuItemSavedat.addActionListener(this);
+		menuItemOpen.addActionListener(this);
+		menuItemSave.addActionListener(this);
 		menuItemExit.addActionListener(this);
 		button1.addActionListener(this);
 		button2.addActionListener(this);
@@ -316,99 +301,169 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 			tf.setText("");
 		}
 
-		if (e.getSource() == menuItemOpentxt) {
+		if (e.getSource() == menuItemOpen) {
+			File f = null;
+			JFileChooser fc = new JFileChooser();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("텍스트문서(*.txt)", "txt"); 
+			FileNameExtensionFilter filter2 = new FileNameExtensionFilter("데이터파일(*.dat)", "dat"); 
+			fc.setFileFilter(filter); 
+			fc.setFileFilter(filter2); 
+			
+			int answer = fc.showOpenDialog(null); 
+			if(answer == JFileChooser.APPROVE_OPTION){ 
+				f = fc.getSelectedFile();
+			}
+			
+			
+			
+			
+			
 			t.clear();
 			FileInputStream fis = null;
-			InputStreamReader isl = null;
-			try {
-				fis = new FileInputStream("D:/TradeList.txt");
-				isl = new InputStreamReader(fis, "euc-kr");
-				BufferedReader br = new BufferedReader(isl);
-				int count = 0;
-
-				while (true) {
-					String list = br.readLine();
-					if (list != null) {
-						String[] list_split = list.split("/");
-						for (i = 0; i < 6; i++) {
-							list_split[i] = list_split[i].trim();
-						}
-						t.add(new Trade());
-						if (list_split[0].substring(5).length() == 1) {
-							list_split[0] = "0" + list_split[0];
-						}
-
-						t.get(count).date = list_split[0];
-						t.get(count).nation = list_split[1];
-						t.get(count).serial_num = (count + 1);
-						t.get(count).exports = Integer.parseInt(list_split[2]);
-						t.get(count).export_sum = Integer
-								.parseInt(list_split[3]);
-						t.get(count).imports = Integer.parseInt(list_split[4]);
-						t.get(count).import_sum = Integer
-								.parseInt(list_split[5]);
-						count++;
-
-					} else {
-						break;
-					}
-
-				}
-				ta.append("텍스트 파일에서 로드했습니다.\n");
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-
-		if (e.getSource() == menuItemOpendat) {
-			FileInputStream fin = null;
 			ObjectInputStream ois = null;
-			try {
-				fin = new FileInputStream("TradeList.dat");
-				ois = new ObjectInputStream(fin);
+			InputStreamReader isl = null;
+			if(f != null){
+				String format = f.toString();
+				format = format.substring(format.length()-3, format.length());
+				if(format.equals("txt")){
+					try {
+						fis = new FileInputStream(f);
+						isl = new InputStreamReader(fis, "euc-kr");
+						BufferedReader br = new BufferedReader(isl);
+						int count = 0;
+						
 
-				ArrayList t = (ArrayList) ois.readObject();
-				this.t = t;
-				ta.append("dat파일에서 로드했습니다.\n");
-			} catch (Exception ex) {
-			} finally {
-				try {
+						while (true) {
+							String list = br.readLine();
+							if (list != null) {
+								String[] list_split = list.split("/");
+								for (i = 0; i < 6; i++) {
+									list_split[i] = list_split[i].trim();
+								}
+								t.add(new Trade());
+								if (list_split[0].substring(5).length() == 1) {
+									list_split[0] = "0" + list_split[0];
+								}
 
-					ois.close();
-					fin.close();
-				} catch (IOException ioe) {
+								t.get(count).date = list_split[0];
+								t.get(count).nation = list_split[1];
+								t.get(count).serial_num = (count + 1);
+								t.get(count).exports = Integer.parseInt(list_split[2]);
+								t.get(count).export_sum = Integer
+										.parseInt(list_split[3]);
+								t.get(count).imports = Integer.parseInt(list_split[4]);
+								t.get(count).import_sum = Integer
+										.parseInt(list_split[5]);
+								count++;
+
+							} else {
+								break;
+							}
+
+						}
+						ta.append("텍스트 파일에서 로드했습니다.\n");
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				else if(format.equals("dat")){
+					try {
+
+						fis = new FileInputStream(f);
+						ois = new ObjectInputStream(fis);
+
+						ArrayList t = (ArrayList) ois.readObject();
+						this.t = t;
+						ta.append("dat파일에서 로드했습니다.\n");
+					} catch (Exception ex) {
+					} finally {
+						try {
+
+							ois.close();
+							fis.close();
+						} catch (IOException ioe) {
+						}
+					}
 				}
 			}
+			
+			
 		}
 
-		if (e.getSource() == menuItemSavetxt) {
-			FileOutputStream fos;
-			OutputStreamWriter osw;
+
+		if (e.getSource() == menuItemSave) {
+			File f = null;
+			JFileChooser fc = new JFileChooser();
+			String save_path = null;
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("텍스트문서(*.txt)", "txt"); 
+			FileNameExtensionFilter filter2 = new FileNameExtensionFilter("데이터파일(*.dat)", "dat"); 
+			fc.setFileFilter(filter); 
+			fc.setFileFilter(filter2); 
+			
+			int answer = fc.showSaveDialog(null);
+			
+			
+			
+			if(answer == JFileChooser.APPROVE_OPTION){
+                f = fc.getSelectedFile();
+                save_path = f.getAbsolutePath();
+
+			}
+			String format = f.toString();
+			format = format.substring(format.length()-3, format.length());
+			FileOutputStream fos = null;
+			ObjectOutputStream oos = null;
+			OutputStreamWriter osw = null;
 			BufferedWriter bw;
-			try {
-				fos = new FileOutputStream("D:/TradeList_output.txt");
-				osw = new OutputStreamWriter(fos, "euc-kr");
-				bw = new BufferedWriter(osw);
-				for (i = 0; i < t.size(); i++) {
-					bw.write(t.get(i).date + "/" + t.get(i).nation + "/"
-							+ t.get(i).exports + "/" + t.get(i).export_sum
-							+ "/" + t.get(i).imports + "/"
-							+ t.get(i).import_sum);
-					bw.newLine();
-				}
-				ta.append("텍스트 파일로 저장했습니다.\n");
-				bw.close();
-				osw.close();
-				fos.close();
+			
+			if(format.equals("txt")){
 
-			} catch (IOException ioe) {
-				// TODO Auto-generated catch block
-				ioe.printStackTrace();
+				try {
+					fos = new FileOutputStream(save_path);
+					osw = new OutputStreamWriter(fos, "euc-kr");
+					bw = new BufferedWriter(osw);
+					for (i = 0; i < t.size(); i++) {
+						bw.write(t.get(i).date + "/" + t.get(i).nation + "/"
+								+ t.get(i).exports + "/" + t.get(i).export_sum
+								+ "/" + t.get(i).imports + "/"
+								+ t.get(i).import_sum);
+						bw.newLine();
+					}
+					ta.append("텍스트 파일로 저장했습니다.\n");
+					bw.close();
+					osw.close();
+					fos.close();
+
+				} catch (IOException ioe) {
+					// TODO Auto-generated catch block
+					ioe.printStackTrace();
+				}
 			}
+			else if(format.equals("dat")){
+				try {
+					fos = new FileOutputStream(save_path);
+					oos = new ObjectOutputStream(fos);
+					oos.writeObject(t);
+					oos.reset();
+					ta.append("dat로 저장되었습니다\n");
+
+				} catch (Exception ex) {
+				} finally {
+					try {
+						oos.close();
+						fos.close();
+					} catch (IOException ioe) {
+
+					}
+				}
+			}
+			
+			
+			
 
 		}
-		if (e.getSource() == menuItemSavedat) {
+		/*if (e.getSource() == menuItemSavedat) {
 
 			FileOutputStream fout = null;
 			ObjectOutputStream oos = null;
@@ -429,7 +484,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 				}
 			}
 
-		}
+		}*/// check
 		if (e.getSource() == menuItemExit) {
 			System.exit(0);
 		}
