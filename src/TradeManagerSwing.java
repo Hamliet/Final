@@ -23,10 +23,13 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -59,16 +62,17 @@ public class TradeManagerSwing {
 	public static void main(String[] args) {
 		new MyFrame();
 	}
-
 }
 
 class MyFrame extends JFrame implements ActionListener, KeyListener,
 		FocusListener {
 
 	ArrayList<Trade> t = new ArrayList<Trade>();
+	ArrayList<MyTrade> mt = new ArrayList<MyTrade>();
 	ArrayList<Nations> n = new ArrayList<Nations>();
 	int i; // for문을 위한 변수
-
+	int count=1; // MyTrade에 새로운 serial을 부여할때 쓰는 변수
+	
 	// swing 부분
 	JButton button1;
 	JButton button2;
@@ -107,7 +111,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		button6 = new JButton("6.항목별 파이그래프 ");
 		clear_button = new JButton("CLEAR");
 		send_button = new JButton("Send");
-		ta = new TextArea("", 39, 109, TextArea.SCROLLBARS_VERTICAL_ONLY);
+		ta = new TextArea("국내 무역총괄 관리 프로그램입니다. 단축키를 보시려면 /?을 입력해주세요.\n", 39, 109, TextArea.SCROLLBARS_VERTICAL_ONLY);
 		memo = new TextArea("", 39, 30, TextArea.SCROLLBARS_VERTICAL_ONLY);
 		tf = new JTextField(20);
 		p1 = new JPanel();
@@ -262,8 +266,214 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		}
 	}
 	public void send_to_memo(){
-		memo.append(tf.getText() + "\n");
-		tf.setText("");
+		if(tf.getText().equals("/?")){
+			ta.append("'/add 시리얼번호' - 메모추가\n'/delete' 시리얼번호 - 메모삭제\n'/show' - 메모 전체보기\n'/save' - 메모를 txt파일로 저장 \n'/load' - txt파일을 메모로 불러오기\n'/clear' - 메인창 클리어\n'/clear memo' - 메모창 클리어\n");
+			tf.setText("");
+		}
+		else if(tf.getText().equals("/clear")){
+			ta.setText("");
+			tf.setText("");
+		}
+		else if(tf.getText().equals("/clear memo")){
+			memo.setText(" ");
+			tf.setText("");
+		}
+		else if(t.size() <= 0){
+			ta.append("아직 자료가 등록되지 않았습니다. 자료를 먼저 등록해주세요.\n");
+		}
+		else{
+
+			if(tf.getText().indexOf("/add ") ==0){
+				add_MyTrade(Integer.parseInt(tf.getText().substring(5)));
+				tf.setText("");
+			}
+			else if(tf.getText().indexOf("/delete ")==0){
+				delete_MyTrade(Integer.parseInt(tf.getText().substring(8)));
+				tf.setText("");
+			}
+			else if(tf.getText().equals("/show")){
+				show_MyTrade();
+				tf.setText("");
+			}
+			else if(tf.getText().equals("/save")){
+				save_MyTrade();
+				tf.setText("");
+			}
+			else if(tf.getText().equals("/load")){
+				load_MyTrade();
+				tf.setText("");
+			}
+			else{
+				ta.append(tf.getText() + "\n");
+				tf.setText("");
+			}
+		}	
+	}
+	public void add_MyTrade(int serial){		
+		if(serial > t.size() || serial <=0){
+			ta.append("범위밖의 숫자를 입력하셨습니다.");
+		}
+		else{
+			mt.add(new MyTrade());
+			mt.get(mt.size()-1).date =  t.get(serial-1).date;
+			mt.get(mt.size()-1).nation = t.get(serial-1).nation;
+			mt.get(mt.size()-1).serial_num = count; 
+			mt.get(mt.size()-1).exports = t.get(serial-1).exports;
+			mt.get(mt.size()-1).export_sum = t.get(serial-1).export_sum;
+			mt.get(mt.size()-1).imports = t.get(serial-1).imports;
+			mt.get(mt.size()-1).import_sum = t.get(serial-1).import_sum;
+			memo.append(mt.get(mt.size()-1).toString());
+			count++;
+		}
+	}
+	public void delete_MyTrade(int serial){
+		if(serial > mt.size() || serial <=0){
+			ta.append("범위밖의 숫자를 입력하셨습니다.");
+		}
+		else{
+			int del_index = -1;
+			for(i=0;i<mt.size();i++){
+				if(mt.get(i).serial_num ==Integer.parseInt(tf.getText().substring(8))){
+					del_index = i;
+					System.out.println("ok");
+				}
+			}
+			mt.remove(del_index);
+		}
+	}
+	public void show_MyTrade(){
+		if(mt.size() == 0){
+			ta.append("메모에 등록한 자료가 없습니다..");
+		}
+		else{
+			memo.setText("");
+			for(i=0;i<mt.size();i++){
+				memo.append(mt.get(i).toString());
+			}
+		}
+	}
+	public void save_MyTrade(){
+		if(mt.size()==0){
+			ta.append("아직 메모에 등록된 자료가 없습니다.");
+		}
+		else{
+			File f = null;
+			JFileChooser fc = new JFileChooser();
+			String save_path = null;
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("텍스트문서(*.txt)", "txt"); 
+			fc.setFileFilter(filter); 
+			
+			int answer = fc.showSaveDialog(null);	
+			if(answer == JFileChooser.APPROVE_OPTION){
+	            f = fc.getSelectedFile();
+	            save_path = f.getAbsolutePath();
+			}
+			
+			String format = f.toString();
+			format = format.substring(format.length()-3, format.length());
+			FileOutputStream fos = null;
+			OutputStreamWriter osw = null;
+			BufferedWriter bw;
+			
+			try {
+				fos = new FileOutputStream(save_path);
+				osw = new OutputStreamWriter(fos, "euc-kr");
+				bw = new BufferedWriter(osw);
+				for (i = 0; i < mt.size(); i++) {
+					bw.write(mt.get(i).date + "/" + mt.get(i).nation + "/"
+							+ mt.get(i).exports + "/" + mt.get(i).export_sum
+							+ "/" + mt.get(i).imports + "/"
+							+ mt.get(i).import_sum);
+					bw.newLine();
+				}
+				ta.append("메모를 텍스트 파일로 저장했습니다.\n");
+				bw.close();
+				osw.close();
+				fos.close();
+
+			} catch (IOException ioe) {
+				// TODO Auto-generated catch block
+				ioe.printStackTrace();
+			}	
+		}
+	}
+	public void load_MyTrade(){
+		File f = null;
+		JFileChooser fc = new JFileChooser();
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("텍스트문서(*.txt)", "txt"); 
+		fc.setFileFilter(filter); 
+		int answer = fc.showOpenDialog(null); 
+		if(answer == JFileChooser.APPROVE_OPTION){ 
+			f = fc.getSelectedFile();
+		}
+		if(f != null){
+			mt.clear();	
+		}
+		try {
+			FileInputStream fis = null;
+			InputStreamReader isl = null;
+			fis = new FileInputStream(f);
+			isl = new InputStreamReader(fis, "euc-kr");
+			BufferedReader br = new BufferedReader(isl);
+			int count = 0;
+			
+
+			while (true) {
+				String list = br.readLine();
+				if (list != null) {
+					String[] list_split = list.split("/");
+					for (i = 0; i < 6; i++) {
+						list_split[i] = list_split[i].trim();
+					}
+					mt.add(new MyTrade());
+					if (list_split[0].substring(5).length() == 1) {
+						list_split[0] = "0" + list_split[0];
+					}
+					mt.get(count).date = list_split[0];
+					mt.get(count).nation = list_split[1];
+					mt.get(count).serial_num = (count + 1);
+					mt.get(count).exports = Integer.parseInt(list_split[2]);
+					mt.get(count).export_sum = Integer
+							.parseInt(list_split[3]);
+					mt.get(count).imports = Integer.parseInt(list_split[4]);
+					mt.get(count).import_sum = Integer
+							.parseInt(list_split[5]);
+					count++;
+
+				} else {
+					break;
+				}
+			}
+			ta.append("메모를 텍스트 파일에서 로드했습니다.\n");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+
+	public void load(){
+		File f = null;
+		JFileChooser fc = new JFileChooser();
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("텍스트문서(*.txt)", "txt"); 
+		FileNameExtensionFilter filter2 = new FileNameExtensionFilter("데이터파일(*.dat)", "dat"); 
+		fc.setFileFilter(filter); 
+		fc.setFileFilter(filter2); 
+		int answer = fc.showOpenDialog(null); 
+		if(answer == JFileChooser.APPROVE_OPTION){ 
+			f = fc.getSelectedFile();
+		}
+		
+		if(f != null){
+			t.clear();
+			String format = f.toString();
+			format = format.substring(format.length()-3, format.length());
+			if(format.equals("txt")){
+				load_to_txt(f);
+			}
+			else if(format.equals("dat")){
+				load_to_dat(f);
+			}
+		}			
 	}
 	public void load_to_txt(File f){
 		try {
@@ -327,6 +537,30 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 				fis.close();
 			} catch (IOException ioe) {
 			}
+		}
+	}
+	public void save(){
+		File f = null;
+		JFileChooser fc = new JFileChooser();
+		String save_path = null;
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("텍스트문서(*.txt)", "txt"); 
+		FileNameExtensionFilter filter2 = new FileNameExtensionFilter("데이터파일(*.dat)", "dat"); 
+		fc.setFileFilter(filter); 
+		fc.setFileFilter(filter2); 
+		
+		int answer = fc.showSaveDialog(null);	
+		if(answer == JFileChooser.APPROVE_OPTION){
+            f = fc.getSelectedFile();
+            save_path = f.getAbsolutePath();
+		}
+		
+		String format = f.toString();
+		format = format.substring(format.length()-3, format.length());
+		if(format.equals("txt")){
+			save_to_text(save_path);	
+		}
+		else if(format.equals("dat")){
+			save_to_dat(save_path);
 		}
 	}
 	public void save_to_text(String save_path){
@@ -431,7 +665,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		}
 
 		if (e.getSource() == button6) {
-
+			button6();
 		}
 
 		if (e.getSource() == send_button) {
@@ -439,53 +673,12 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		}
 
 		if (e.getSource() == menuItemOpen) {
-			File f = null;
-			JFileChooser fc = new JFileChooser();
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("텍스트문서(*.txt)", "txt"); 
-			FileNameExtensionFilter filter2 = new FileNameExtensionFilter("데이터파일(*.dat)", "dat"); 
-			fc.setFileFilter(filter); 
-			fc.setFileFilter(filter2); 
-			int answer = fc.showOpenDialog(null); 
-			if(answer == JFileChooser.APPROVE_OPTION){ 
-				f = fc.getSelectedFile();
-			}
-			t.clear();
-			if(f != null){
-				String format = f.toString();
-				format = format.substring(format.length()-3, format.length());
-				if(format.equals("txt")){
-					load_to_txt(f);
-				}
-				else if(format.equals("dat")){
-					load_to_dat(f);
-				}
-			}	
+			load();
 		}
 
 
 		if (e.getSource() == menuItemSave) {
-			File f = null;
-			JFileChooser fc = new JFileChooser();
-			String save_path = null;
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("텍스트문서(*.txt)", "txt"); 
-			FileNameExtensionFilter filter2 = new FileNameExtensionFilter("데이터파일(*.dat)", "dat"); 
-			fc.setFileFilter(filter); 
-			fc.setFileFilter(filter2); 
-			
-			int answer = fc.showSaveDialog(null);	
-			if(answer == JFileChooser.APPROVE_OPTION){
-                f = fc.getSelectedFile();
-                save_path = f.getAbsolutePath();
-			}
-			
-			String format = f.toString();
-			format = format.substring(format.length()-3, format.length());
-			if(format.equals("txt")){
-				save_to_text(save_path);	
-			}
-			else if(format.equals("dat")){
-				save_to_dat(save_path);
-			}
+			save();
 		}
 		
 		if (e.getSource() == menuItemExit) {
@@ -496,7 +689,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 
 }
 
-class Button1_Frame extends JDialog implements ActionListener, KeyListener {
+class Button1_Frame extends JDialog implements ActionListener {
 	MyFrame MyFrame;
 	JLabel label1;
 	JLabel label2;
@@ -580,21 +773,6 @@ class Button1_Frame extends JDialog implements ActionListener, KeyListener {
 	}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-
-	}
-
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == SEND) {
 			MyFrame.t.add(new Trade());
@@ -627,7 +805,7 @@ class Button1_Frame extends JDialog implements ActionListener, KeyListener {
 
 }
 
-class Button2_Frame extends JDialog implements ActionListener, KeyListener {
+class Button2_Frame extends JDialog implements ActionListener {
 	MyFrame MyFrame;
 	JLabel label1;
 	JLabel label2;
@@ -658,7 +836,6 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener {
 	JButton Delete;
 	JButton CLOSE;
 	JButton Search;
-
 
 	public Button2_Frame(MyFrame MyFrame) {
 		setTitle("Edit Trade");
@@ -703,12 +880,10 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener {
 		p1.add(tf2);
 		p1.add(Search);
 		add(p1, 0);
-
 		p2.add(label4);
 		p2.add(tf3);
 		p2.add(Delete);
 		add(p2, 1);
-
 		p3.add(label5);
 		p3.add(tf4);
 		p3.add(label6);
@@ -719,7 +894,6 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener {
 		p4.add(tf7);
 		add(p3, 2);
 		add(p4, 3);
-
 		p5.add(label9);
 		add(p5, 4);
 		p6.add(Edit);
@@ -730,21 +904,6 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener {
 		Delete.addActionListener(this);
 		CLOSE.addActionListener(this);
 		Search.addActionListener(this);
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-
 	}
 
 	@Override
@@ -773,8 +932,6 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener {
 				MyFrame.ta.append(tf3.getText() + "번 자료가 삭제되었습니다.\n");
 				dispose();
 			}
-
-
 		}
 		if (e.getSource() == CLOSE) {
 			dispose();
@@ -798,14 +955,11 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener {
 			if (find == -1) {
 				tf3.setText("존재하지 않습니다.");
 			}
-
 		}
-
 	}
-
 }
 
-class Button4_Frame extends JDialog implements ActionListener, KeyListener {
+class Button4_Frame extends JDialog implements ActionListener {
 	MyFrame MyFrame;
 	Choice nation_choice;
 	JLabel label1;
@@ -882,6 +1036,7 @@ class Button4_Frame extends JDialog implements ActionListener, KeyListener {
 		CLOSE = new JButton("CLOSE");
 
 		setLayout(new GridLayout(5, 1));
+		
 		p1.add(label1);
 		p1.add(tf1);
 		p1.add(label2);
@@ -910,22 +1065,6 @@ class Button4_Frame extends JDialog implements ActionListener, KeyListener {
 		Search.addActionListener(this);
 		CLOSE.addActionListener(this);
 		setVisible(true);
-
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-
 	}
 
 	@Override
@@ -1053,17 +1192,13 @@ class Button4_Frame extends JDialog implements ActionListener, KeyListener {
 						}
 					}
 				}
-
 			}
 			dispose();
 		}
-
 		if (e.getSource() == CLOSE) {
 			dispose();
 		}
-
 	}
-
 }
 
 class Button5_Frame extends JDialog {
@@ -1090,7 +1225,6 @@ class Button5_Frame extends JDialog {
 		chartPanel.setPreferredSize(new Dimension(700, 470));
 		setContentPane(chartPanel);
 	}
-	
 	
 
 	private CategoryDataset createDataset() {
@@ -1194,8 +1328,8 @@ class Button5_Frame extends JDialog {
 					import_sum_year [15] += MyFrame.t.get(i).import_sum;
 				}
 			}
-			else if(nations == null || nations.equals("Korea")){
-				nations = "Korea";
+			else if(nations == null || nations.equals("all")){
+				nations = "all";
 				if(Integer.parseInt(MyFrame.t.get(i).date.substring(0,4)) == 2000){		
 					export_sum_year [0] += MyFrame.t.get(i).export_sum;
 					import_sum_year [0] += MyFrame.t.get(i).import_sum;	
@@ -1260,18 +1394,14 @@ class Button5_Frame extends JDialog {
 					export_sum_year [15] += MyFrame.t.get(i).export_sum;
 					import_sum_year [15] += MyFrame.t.get(i).import_sum;
 				}
-			}
-			
-			
-			
+			}		
 		}
 
 		for(int i=0;i<16;i++){
 			trade_balance_year[i] = export_sum_year [i] - import_sum_year [i];
 		}
 		
-		
-		
+
 		dataset.addValue(trade_balance_year[0], series1, type1);
 		dataset.addValue(trade_balance_year[1], series1, type2);
 		dataset.addValue(trade_balance_year[2], series1, type3);
@@ -1345,7 +1475,7 @@ class Button5_Frame extends JDialog {
 
 }
 
-class Button5_Select_Frame extends JDialog implements ActionListener, KeyListener {
+class Button5_Select_Frame extends JDialog implements ActionListener {
 	static MyFrame MyFrame;
 	JLabel label1;
 	Choice nation_choice;
@@ -1396,21 +1526,6 @@ class Button5_Select_Frame extends JDialog implements ActionListener, KeyListene
 	}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-
-	}
-
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == Search){
 			if(nation_choice.getSelectedItem().equals("전체")){
@@ -1438,7 +1553,7 @@ class Button5_Select_Frame extends JDialog implements ActionListener, KeyListene
 
 }
 
-class Button6_Frame extends JDialog implements ActionListener, KeyListener {
+class Button6_Frame extends JDialog  {
 	static MyFrame MyFrame;
 	static String key;
 	static String [] nation_sample;
@@ -1569,39 +1684,9 @@ class Button6_Frame extends JDialog implements ActionListener, KeyListener {
         JFreeChart chart = createChart(createDataset());
         return new ChartPanel(chart);
     }
-    
-
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }
 
-class Button6_Select_Frame extends JDialog implements ActionListener, KeyListener {
+class Button6_Select_Frame extends JDialog implements ActionListener {
 	MyFrame MyFrame;
 	JLabel label1;
 	JLabel label2;
@@ -1680,21 +1765,6 @@ class Button6_Select_Frame extends JDialog implements ActionListener, KeyListene
 	}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-
-	}
-
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == Add){
 			if (e.getSource() == Add && all == -1) {
@@ -1731,14 +1801,11 @@ class Button6_Select_Frame extends JDialog implements ActionListener, KeyListene
 		        RefineryUtilities.centerFrameOnScreen(b6);
 		        b6.setVisible(true);
 			}
-			dispose();
-			
+			dispose();		
 		}
 
 		if(e.getSource() == CLOSE){
 			dispose();
 		}
-
 	}
-
 }
