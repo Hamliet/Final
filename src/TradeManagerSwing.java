@@ -234,7 +234,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener {
 		}
 	}
 	
-	public void button4(){
+	public void search(){
 		if (t.size() != 0) {
 
 			new Button4_Frame(MyFrame.this);
@@ -242,14 +242,14 @@ class MyFrame extends JFrame implements ActionListener, KeyListener {
 			ta.append("등록된 자료가 없습니다.\n");
 		}
 	}
-	public void button5(){
+	public void line_graph(){
 		if (t.size() != 0) {
 			new Button5_Select_Frame(MyFrame.this);
 		} else {
 			ta.append("등록된 자료가 없습니다.\n");
 		}
 	}
-	public void button6(){
+	public void pie_graph(){
 		if (t.size() != 0) {
 			new Button6_Select_Frame(MyFrame.this);				
 			
@@ -642,15 +642,15 @@ class MyFrame extends JFrame implements ActionListener, KeyListener {
 		}
 
 		if (e.getSource() == button4) {
-			button4();
+			search();
 		}
 
 		if (e.getSource() == button5) {
-			button5();
+			line_graph();
 		}
 
 		if (e.getSource() == button6) {
-			button6();
+			pie_graph();
 		}
 
 		if (e.getSource() == send_button) {
@@ -1186,6 +1186,86 @@ class Button4_Frame extends JDialog implements ActionListener {
 	}
 }
 
+
+class Button5_Select_Frame extends JDialog implements ActionListener {
+	static MyFrame MyFrame;
+	JLabel label1;
+	Choice nation_choice;
+	HashSet<String> sample = new HashSet<String>();
+	JButton Search;
+	JButton CLOSE;
+	JPanel p1;
+	JPanel p2;
+	 
+	public Button5_Select_Frame(MyFrame MyFrame) {
+		this.MyFrame = MyFrame;
+		setTitle("Select Nation");
+		setSize(300,140);
+		label1 = new JLabel("대상국가");
+		nation_choice = new Choice();
+		Search = new JButton("Search");
+		CLOSE = new JButton("CLOSE");
+		p1 = new JPanel();
+		p2 = new JPanel();
+		
+		for(int i=0;i<this.MyFrame.t.size();i++){ //콤보박스 설정
+			sample.add(this.MyFrame.t.get(i).nation); 
+		} 
+		Iterator<String> iterator = sample.iterator();
+		nation_choice.add("전체");
+		int i=0;
+		MyFrame.set_Nations();
+		String [] nation = new String[MyFrame.n.size()]; 
+		while (iterator.hasNext()) {
+			nation[i] = iterator.next();
+			i++;
+		}
+		Arrays.sort(nation);
+		for(i=0;i<nation.length;i++){
+			nation_choice.add(nation[i]);
+		}
+		Search.addActionListener(this);
+		CLOSE.addActionListener(this);
+		setLayout(new GridLayout(2,1));
+		
+		p1.add(label1);
+		p1.add(nation_choice);
+		p2.add(Search);
+		p2.add(CLOSE);	
+		add(p1,0);
+		add(p2,1);
+		setVisible(true);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == Search){
+			if(nation_choice.getSelectedItem().equals("전체")){
+				Button5_Frame b5 = new Button5_Frame(MyFrame);
+				b5.pack();
+				RefineryUtilities.centerFrameOnScreen(b5);
+				b5.setVisible(true);
+
+			}
+			else{
+				String nation = nation_choice.getSelectedItem();
+				Button5_Frame b5 = new Button5_Frame(MyFrame,nation);
+				b5.pack();
+				RefineryUtilities.centerFrameOnScreen(b5);
+				b5.setVisible(true);
+			}
+			dispose();
+			
+		}
+		if(e.getSource() == CLOSE){
+			dispose();
+		}
+
+	}
+
+}
+
+
 class Button5_Frame extends JDialog {
 	MyFrame MyFrame;
 	String nations;
@@ -1460,30 +1540,49 @@ class Button5_Frame extends JDialog {
 
 }
 
-class Button5_Select_Frame extends JDialog implements ActionListener {
-	static MyFrame MyFrame;
+class Button6_Select_Frame extends JDialog implements ActionListener {
+	MyFrame MyFrame;
 	JLabel label1;
+	JLabel label2;
+	JLabel label3;
+	Choice legend_choice;
 	Choice nation_choice;
-	HashSet<String> sample = new HashSet<String>();
+	JTextField n_tf;
+	JTextArea ta;
+	JButton Add;
 	JButton Search;
 	JButton CLOSE;
 	JPanel p1;
 	JPanel p2;
-	 
-	public Button5_Select_Frame(MyFrame MyFrame) {
+	JPanel p3;
+	JPanel p4;
+	int all = -1;
+	HashSet<String> sample = new HashSet<String>();
+	public Button6_Select_Frame(MyFrame MyFrame) {
 		this.MyFrame = MyFrame;
-		setTitle("Select Nation");
-		setSize(300,140);
-		label1 = new JLabel("대상국가");
-		nation_choice = new Choice();
+		setTitle("Select Legend");
+		setSize(370,220);
+		label1 = new JLabel("범례설정");
+		label2 = new JLabel("국가선택");
+		label3 = new JLabel("검색대상");
+		legend_choice = new Choice();
+		Add = new JButton("Add");
 		Search = new JButton("Search");
 		CLOSE = new JButton("CLOSE");
 		p1 = new JPanel();
 		p2 = new JPanel();
-		
-		for(int i=0;i<this.MyFrame.t.size();i++){ //콤보박스 설정
-			sample.add(this.MyFrame.t.get(i).nation); 
-		} 
+		p3 = new JPanel();
+		p4 = new JPanel();
+		legend_choice.add("수출량");
+		legend_choice.add("수출금액");
+		legend_choice.add("수입량");
+		legend_choice.add("수입금액");
+		ta = new JTextArea();
+		ta.disable();
+		nation_choice = new Choice();
+		for (int i = 0; i < this.MyFrame.t.size(); i++) { // 콤보박스 설정
+			sample.add(this.MyFrame.t.get(i).nation);
+		}
 		Iterator<String> iterator = sample.iterator();
 		nation_choice.add("전체");
 		int i=0;
@@ -1497,45 +1596,72 @@ class Button5_Select_Frame extends JDialog implements ActionListener {
 		for(i=0;i<nation.length;i++){
 			nation_choice.add(nation[i]);
 		}
+		Add.addActionListener(this);
 		Search.addActionListener(this);
 		CLOSE.addActionListener(this);
-		setLayout(new GridLayout(2,1));
+		setLayout(new GridLayout(4,1));
 		
-		p1.add(label1);
+		p2.add(label1);
+		p2.add(legend_choice);
+		p1.add(label2);
 		p1.add(nation_choice);
-		p2.add(Search);
-		p2.add(CLOSE);	
+		p1.add(Add);
+		p3.setLayout(new BorderLayout());
+		p3.add(label3,"West");
+		p3.add(ta,"Center");
+		p4.add(Search);
+		p4.add(CLOSE);	
 		add(p1,0);
-		add(p2,1);
+		add(p3,1);
+		add(p2,2);
+		add(p4,3);
 		setVisible(true);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == Add){
+			if (e.getSource() == Add && all == -1) {
+				String choosen = nation_choice.getSelectedItem().toString();
+				if (choosen.equals("전체")) { // 전체가 선택되면 비활성화
+					all = 1;
+				}
+				nation_choice.remove(nation_choice.getSelectedIndex());
+				ta.append(choosen + "/");
+			}
+		}
 		if(e.getSource() == Search){
-			if(nation_choice.getSelectedItem().equals("전체")){
-				Button5_Frame b5 = new Button5_Frame(MyFrame);
-				b5.pack();
-				RefineryUtilities.centerFrameOnScreen(b5);
-				b5.setVisible(true);
-
+			if (ta.getText().length() == 0) {
+				MyFrame.ta.append("국가를 선택하지 않았습니다."); // 국가선택을 안했을 경우
 			}
 			else{
-				String nation = nation_choice.getSelectedItem();
-				Button5_Frame b5 = new Button5_Frame(MyFrame,nation);
-				b5.pack();
-				RefineryUtilities.centerFrameOnScreen(b5);
-				b5.setVisible(true);
+				String key = null;
+				if(legend_choice.getSelectedItem().equals("수출량")){
+					key="수출량";
+				}
+				else if(legend_choice.getSelectedItem().equals("수출금액")){
+					key="수출금액";
+				}
+				else if(legend_choice.getSelectedItem().equals("수입량")){
+					key="수입량";
+				}
+				else if(legend_choice.getSelectedItem().equals("수입금액")){
+					key="수입금액";
+				}
+				
+				Button6_Frame b6 = new Button6_Frame(MyFrame,key,ta.getText());
+				b6.nation_sample = ta.getText().split("/");
+		        b6.pack();
+		        RefineryUtilities.centerFrameOnScreen(b6);
+		        b6.setVisible(true);
 			}
-			dispose();
-			
+			dispose();		
 		}
+
 		if(e.getSource() == CLOSE){
 			dispose();
 		}
-
 	}
-
 }
 
 class Button6_Frame extends JDialog  {
@@ -1671,126 +1797,4 @@ class Button6_Frame extends JDialog  {
     }
 }
 
-class Button6_Select_Frame extends JDialog implements ActionListener {
-	MyFrame MyFrame;
-	JLabel label1;
-	JLabel label2;
-	JLabel label3;
-	Choice legend_choice;
-	Choice nation_choice;
-	JTextField n_tf;
-	JTextArea ta;
-	JButton Add;
-	JButton Search;
-	JButton CLOSE;
-	JPanel p1;
-	JPanel p2;
-	JPanel p3;
-	JPanel p4;
-	int all = -1;
-	HashSet<String> sample = new HashSet<String>();
-	public Button6_Select_Frame(MyFrame MyFrame) {
-		this.MyFrame = MyFrame;
-		setTitle("Select Legend");
-		setSize(370,220);
-		label1 = new JLabel("범례설정");
-		label2 = new JLabel("국가선택");
-		label3 = new JLabel("검색대상");
-		legend_choice = new Choice();
-		Add = new JButton("Add");
-		Search = new JButton("Search");
-		CLOSE = new JButton("CLOSE");
-		p1 = new JPanel();
-		p2 = new JPanel();
-		p3 = new JPanel();
-		p4 = new JPanel();
-		legend_choice.add("수출량");
-		legend_choice.add("수출금액");
-		legend_choice.add("수입량");
-		legend_choice.add("수입금액");
-		ta = new JTextArea();
-		ta.disable();
-		nation_choice = new Choice();
-		for (int i = 0; i < this.MyFrame.t.size(); i++) { // 콤보박스 설정
-			sample.add(this.MyFrame.t.get(i).nation);
-		}
-		Iterator<String> iterator = sample.iterator();
-		nation_choice.add("전체");
-		int i=0;
-		MyFrame.set_Nations();
-		String [] nation = new String[MyFrame.n.size()]; 
-		while (iterator.hasNext()) {
-			nation[i] = iterator.next();
-			i++;
-		}
-		Arrays.sort(nation);
-		for(i=0;i<nation.length;i++){
-			nation_choice.add(nation[i]);
-		}
-		Add.addActionListener(this);
-		Search.addActionListener(this);
-		CLOSE.addActionListener(this);
-		setLayout(new GridLayout(4,1));
-		
-		p2.add(label1);
-		p2.add(legend_choice);
-		p1.add(label2);
-		p1.add(nation_choice);
-		p1.add(Add);
-		p3.setLayout(new BorderLayout());
-		p3.add(label3,"West");
-		p3.add(ta,"Center");
-		p4.add(Search);
-		p4.add(CLOSE);	
-		add(p1,0);
-		add(p3,1);
-		add(p2,2);
-		add(p4,3);
-		setVisible(true);
-	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == Add){
-			if (e.getSource() == Add && all == -1) {
-				String choosen = nation_choice.getSelectedItem().toString();
-				if (choosen.equals("전체")) { // 전체가 선택되면 비활성화
-					all = 1;
-				}
-				nation_choice.remove(nation_choice.getSelectedIndex());
-				ta.append(choosen + "/");
-			}
-		}
-		if(e.getSource() == Search){
-			if (ta.getText().length() == 0) {
-				MyFrame.ta.append("국가를 선택하지 않았습니다."); // 국가선택을 안했을 경우
-			}
-			else{
-				String key = null;
-				if(legend_choice.getSelectedItem().equals("수출량")){
-					key="수출량";
-				}
-				else if(legend_choice.getSelectedItem().equals("수출금액")){
-					key="수출금액";
-				}
-				else if(legend_choice.getSelectedItem().equals("수입량")){
-					key="수입량";
-				}
-				else if(legend_choice.getSelectedItem().equals("수입금액")){
-					key="수입금액";
-				}
-				
-				Button6_Frame b6 = new Button6_Frame(MyFrame,key,ta.getText());
-				b6.nation_sample = ta.getText().split("/");
-		        b6.pack();
-		        RefineryUtilities.centerFrameOnScreen(b6);
-		        b6.setVisible(true);
-			}
-			dispose();		
-		}
-
-		if(e.getSource() == CLOSE){
-			dispose();
-		}
-	}
-}
