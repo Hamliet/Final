@@ -1,4 +1,3 @@
-//차트부분 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Choice;
@@ -9,8 +8,6 @@ import java.awt.GridLayout;
 import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.BufferedReader;
@@ -23,13 +20,10 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -310,7 +304,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener {
 	}
 	public void add_MyTrade(int serial){		
 		if(serial > t.size() || serial <=0){
-			ta.append("범위밖의 숫자를 입력하셨습니다.");
+			ta.append("범위밖의 숫자를 입력하셨습니다.\n");
 		}
 		else{
 			mt.add(new MyTrade());
@@ -327,7 +321,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener {
 	}
 	public void delete_MyTrade(int serial){
 		if(serial > mt.size() || serial <=0){
-			ta.append("범위밖의 숫자를 입력하셨습니다.");
+			ta.append("범위밖의 숫자를 입력하셨습니다.\n");
 		}
 		else{
 			int del_index = -1;
@@ -863,10 +857,10 @@ class Button2_Frame extends JDialog implements ActionListener {
 		Search = new JButton("SEARCH");
 		setLayout(new GridLayout(6, 1));
 		p1.add(label2);
-		p1.add(label_year);
 		p1.add(year);
-		p1.add(label_month);
+		p1.add(label_year);
 		p1.add(month);
+		p1.add(label_month);
 		p1.add(label3);
 		p1.add(tf2);
 		p1.add(Search);
@@ -1066,7 +1060,7 @@ class Button4_Frame extends JDialog implements ActionListener {
 				all = 1;
 			}
 			nation_choice.remove(nation_choice.getSelectedIndex());
-			ta.append(choosen + " ");
+			ta.append(choosen + "/");
 		}
 
 		if (e.getSource() == Search) {
@@ -1117,7 +1111,7 @@ class Button4_Frame extends JDialog implements ActionListener {
 							|| Integer.parseInt(s4) > 12) {
 						MyFrame.ta.append("기간을 올바르게 입력하지 않았습니다.\n");
 					} else {
-						String[] list = ta.getText().split(" ");
+						String[] list = ta.getText().split("/");
 						if (all_date == 1 && all == 1) { // 모든날짜, 모든국가일때
 							MyFrame.ta.append("\n<<검색결과>>\n");
 							for (int i = 0; i < MyFrame.t.size(); i++) {
@@ -1553,7 +1547,7 @@ class Button6_Frame extends JDialog  {
 		setTitle("Pie Chart");
 		this.MyFrame = MyFrame;
 		this.key = key;
-		nation_sample = before_split.split(" ");
+		nation_sample = before_split.split("/");
 		setContentPane(createDemoPanel());
 	}
 
@@ -1764,7 +1758,7 @@ class Button6_Select_Frame extends JDialog implements ActionListener {
 					all = 1;
 				}
 				nation_choice.remove(nation_choice.getSelectedIndex());
-				ta.append(choosen + " ");
+				ta.append(choosen + "/");
 			}
 		}
 		if(e.getSource() == Search){
@@ -1787,7 +1781,7 @@ class Button6_Select_Frame extends JDialog implements ActionListener {
 				}
 				
 				Button6_Frame b6 = new Button6_Frame(MyFrame,key,ta.getText());
-				b6.nation_sample = ta.getText().split(" ");
+				b6.nation_sample = ta.getText().split("/");
 		        b6.pack();
 		        RefineryUtilities.centerFrameOnScreen(b6);
 		        b6.setVisible(true);
