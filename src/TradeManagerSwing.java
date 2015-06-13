@@ -64,8 +64,7 @@ public class TradeManagerSwing {
 	}
 }
 
-class MyFrame extends JFrame implements ActionListener, KeyListener,
-		FocusListener {
+class MyFrame extends JFrame implements ActionListener, KeyListener {
 
 	ArrayList<Trade> t = new ArrayList<Trade>();
 	ArrayList<MyTrade> mt = new ArrayList<MyTrade>();
@@ -141,7 +140,6 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		button6.addActionListener(this);
 		send_button.addActionListener(this);
 		tf.addKeyListener(this);
-		tf.addFocusListener(this);
 
 		p1.add(tf);
 		p1.add(send_button);
@@ -280,6 +278,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		}
 		else if(t.size() <= 0){
 			ta.append("아직 자료가 등록되지 않았습니다. 자료를 먼저 등록해주세요.\n");
+			tf.setText("");
 		}
 		else{
 
@@ -368,32 +367,33 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 	            f = fc.getSelectedFile();
 	            save_path = f.getAbsolutePath();
 			}
-			
-			String format = f.toString();
-			format = format.substring(format.length()-3, format.length());
-			FileOutputStream fos = null;
-			OutputStreamWriter osw = null;
-			BufferedWriter bw;
-			
-			try {
-				fos = new FileOutputStream(save_path);
-				osw = new OutputStreamWriter(fos, "euc-kr");
-				bw = new BufferedWriter(osw);
-				for (i = 0; i < mt.size(); i++) {
-					bw.write(mt.get(i).date + "/" + mt.get(i).nation + "/"
-							+ mt.get(i).exports + "/" + mt.get(i).export_sum
-							+ "/" + mt.get(i).imports + "/"
-							+ mt.get(i).import_sum);
-					bw.newLine();
-				}
-				ta.append("메모를 텍스트 파일로 저장했습니다.\n");
-				bw.close();
-				osw.close();
-				fos.close();
+			if(f!=null){
+				String format = f.toString();
+				format = format.substring(format.length()-3, format.length());				
+				FileOutputStream fos = null;
+				OutputStreamWriter osw = null;
+				BufferedWriter bw;
+				
+				try {
+					fos = new FileOutputStream(save_path);
+					osw = new OutputStreamWriter(fos, "euc-kr");
+					bw = new BufferedWriter(osw);
+					for (i = 0; i < mt.size(); i++) {
+						bw.write(mt.get(i).date + "/" + mt.get(i).nation + "/"
+								+ mt.get(i).exports + "/" + mt.get(i).export_sum
+								+ "/" + mt.get(i).imports + "/"
+								+ mt.get(i).import_sum);
+						bw.newLine();
+					}
+					ta.append("메모를 텍스트 파일로 저장했습니다.\n");
+					bw.close();
+					osw.close();
+					fos.close();
 
-			} catch (IOException ioe) {
-				// TODO Auto-generated catch block
-				ioe.printStackTrace();
+				} catch (IOException ioe) {
+					// TODO Auto-generated catch block
+					ioe.printStackTrace();
+				}	
 			}	
 		}
 	}
@@ -408,47 +408,46 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		}
 		if(f != null){
 			mt.clear();	
-		}
-		try {
-			FileInputStream fis = null;
-			InputStreamReader isl = null;
-			fis = new FileInputStream(f);
-			isl = new InputStreamReader(fis, "euc-kr");
-			BufferedReader br = new BufferedReader(isl);
-			int count = 0;
-			
+			try {
+				FileInputStream fis = null;
+				InputStreamReader isl = null;
+				fis = new FileInputStream(f);
+				isl = new InputStreamReader(fis, "euc-kr");
+				BufferedReader br = new BufferedReader(isl);
+				int count = 0;
+				while (true) {
+					String list = br.readLine();
+					if (list != null) {
+						String[] list_split = list.split("/");
+						for (i = 0; i < 6; i++) {
+							list_split[i] = list_split[i].trim();
+						}
+						mt.add(new MyTrade());
+						if (list_split[0].substring(5).length() == 1) {
+							list_split[0] = "0" + list_split[0];
+						}
+						mt.get(count).date = list_split[0];
+						mt.get(count).nation = list_split[1];
+						mt.get(count).serial_num = (count + 1);
+						mt.get(count).exports = Integer.parseInt(list_split[2]);
+						mt.get(count).export_sum = Integer
+								.parseInt(list_split[3]);
+						mt.get(count).imports = Integer.parseInt(list_split[4]);
+						mt.get(count).import_sum = Integer
+								.parseInt(list_split[5]);
+						count++;
 
-			while (true) {
-				String list = br.readLine();
-				if (list != null) {
-					String[] list_split = list.split("/");
-					for (i = 0; i < 6; i++) {
-						list_split[i] = list_split[i].trim();
+					} else {
+						break;
 					}
-					mt.add(new MyTrade());
-					if (list_split[0].substring(5).length() == 1) {
-						list_split[0] = "0" + list_split[0];
-					}
-					mt.get(count).date = list_split[0];
-					mt.get(count).nation = list_split[1];
-					mt.get(count).serial_num = (count + 1);
-					mt.get(count).exports = Integer.parseInt(list_split[2]);
-					mt.get(count).export_sum = Integer
-							.parseInt(list_split[3]);
-					mt.get(count).imports = Integer.parseInt(list_split[4]);
-					mt.get(count).import_sum = Integer
-							.parseInt(list_split[5]);
-					count++;
-
-				} else {
-					break;
 				}
+				ta.append("메모를 텍스트 파일에서 로드했습니다.\n");
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-			ta.append("메모를 텍스트 파일에서 로드했습니다.\n");
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
+		
 	}
 
 	public void load(){
@@ -553,15 +552,17 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
             f = fc.getSelectedFile();
             save_path = f.getAbsolutePath();
 		}
-		
-		String format = f.toString();
-		format = format.substring(format.length()-3, format.length());
-		if(format.equals("txt")){
-			save_to_text(save_path);	
+		if(f!=null){
+			String format = f.toString();
+			format = format.substring(format.length()-3, format.length());	
+			if(format.equals("txt")){
+				save_to_text(save_path);	
+			}
+			else if(format.equals("dat")){
+				save_to_dat(save_path);
+			}
 		}
-		else if(format.equals("dat")){
-			save_to_dat(save_path);
-		}
+
 	}
 	public void save_to_text(String save_path){
 		FileOutputStream fos = null;
@@ -608,16 +609,6 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 
 			}
 		}
-	}
-
-	@Override
-	public void focusGained(FocusEvent arg0) {
-
-	}
-
-	@Override
-	public void focusLost(FocusEvent arg0) {
-
 	}
 
 	@Override
