@@ -24,6 +24,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -56,7 +57,7 @@ import org.jfree.ui.RefineryUtilities;
 
 public class TradeManagerSwing {
 	public static void main(String[] args) {
-		MyFrame f = new MyFrame();
+		new MyFrame();
 	}
 
 }
@@ -95,7 +96,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 
 	public MyFrame() { // 생성자
 		setTitle("Trade Manager");
-		setSize(1025, 760);
+		setSize(1050, 760);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		button1 = new JButton("1.무역정보 추가");
 		button2 = new JButton("2.무역정보 수정/삭제");
@@ -106,7 +107,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 		button6 = new JButton("6.항목별 파이그래프 ");
 		clear_button = new JButton("CLEAR");
 		send_button = new JButton("Send");
-		ta = new TextArea("", 39, 98, TextArea.SCROLLBARS_VERTICAL_ONLY);
+		ta = new TextArea("", 39, 109, TextArea.SCROLLBARS_VERTICAL_ONLY);
 		memo = new TextArea("", 39, 30, TextArea.SCROLLBARS_VERTICAL_ONLY);
 		tf = new JTextField(20);
 		p1 = new JPanel();
@@ -160,8 +161,6 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 
 	public void set_Nations(){
 		n.clear();
-		
-		
 		HashSet<String> sample = new HashSet<String>(); //총 나라의 수를 구하기
 		for (int i = 0; i < t.size(); i++) { 
 			sample.add(t.get(i).nation);
@@ -184,11 +183,197 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 					n.get(j).total_exports += t.get(i).exports;
 					n.get(j).total_export_sum += t.get(i).export_sum;
 					n.get(j).total_imports += t.get(i).imports;
-					n.get(j).total_import_sum += t.get(i).import_sum;
-					
+					n.get(j).total_import_sum += t.get(i).import_sum;		
 				}
 			}	
 		}		
+	}
+	public void add(){
+		new Button1_Frame(MyFrame.this);
+	}
+	
+	public void edit(){
+		if (t.size() != 0) {
+			new Button2_Frame(MyFrame.this);
+		} else {
+			ta.append("등록된 자료가 없습니다.\n");
+		}
+	}
+	
+	public void show_all(){
+		if (t.size() != 0) {
+			for (i = 0; i < t.size(); i++) {
+				ta.append(t.get(i).toString());
+			}
+		} else {
+			ta.append("등록된 자료가 없습니다.\n");
+		}
+	}
+	
+	public void show_by_nation(){
+		set_Nations();
+		HashSet<String> sample = new HashSet<String>();
+		for (int i = 0; i < t.size(); i++) { // 콤보박스 설정
+			sample.add(t.get(i).nation);
+		}
+		Iterator<String> iterator = sample.iterator();
+		int i=0;
+		String [] nation = new String[n.size()]; 
+		while (iterator.hasNext()) {
+			nation[i] = iterator.next();
+			i++;
+		}
+		Arrays.sort(nation);
+
+		if (t.size() != 0) {
+			for(i=0;i<nation.length;i++){
+				for(int j=0;j<n.size();j++){
+					if(nation[i].equals(n.get(j).name)){
+						ta.append(n.get(j).toString());
+					}
+				}
+			}
+		} else {
+			ta.append("등록된 자료가 없습니다.\n");
+		}
+	}
+	
+	public void button4(){
+		if (t.size() != 0) {
+
+			new Button4_Frame(MyFrame.this);
+		} else {
+			ta.append("등록된 자료가 없습니다.\n");
+		}
+	}
+	public void button5(){
+		if (t.size() != 0) {
+			new Button5_Select_Frame(MyFrame.this);
+		} else {
+			ta.append("등록된 자료가 없습니다.\n");
+		}
+	}
+	public void button6(){
+		if (t.size() != 0) {
+			new Button6_Select_Frame(MyFrame.this);				
+			
+		} else {
+			ta.append("등록된 자료가 없습니다.\n");
+		}
+	}
+	public void send_to_memo(){
+		memo.append(tf.getText() + "\n");
+		tf.setText("");
+	}
+	public void load_to_txt(File f){
+		try {
+			FileInputStream fis = null;
+			InputStreamReader isl = null;
+			fis = new FileInputStream(f);
+			isl = new InputStreamReader(fis, "euc-kr");
+			BufferedReader br = new BufferedReader(isl);
+			int count = 0;
+			
+
+			while (true) {
+				String list = br.readLine();
+				if (list != null) {
+					String[] list_split = list.split("/");
+					for (i = 0; i < 6; i++) {
+						list_split[i] = list_split[i].trim();
+					}
+					t.add(new Trade());
+					if (list_split[0].substring(5).length() == 1) {
+						list_split[0] = "0" + list_split[0];
+					}
+
+					t.get(count).date = list_split[0];
+					t.get(count).nation = list_split[1];
+					t.get(count).serial_num = (count + 1);
+					t.get(count).exports = Integer.parseInt(list_split[2]);
+					t.get(count).export_sum = Integer
+							.parseInt(list_split[3]);
+					t.get(count).imports = Integer.parseInt(list_split[4]);
+					t.get(count).import_sum = Integer
+							.parseInt(list_split[5]);
+					count++;
+
+				} else {
+					break;
+				}
+			}
+			ta.append("텍스트 파일에서 로드했습니다.\n");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	public void load_to_dat(File f){
+		FileInputStream fis = null;
+		ObjectInputStream ois = null;
+		try {
+
+			fis = new FileInputStream(f);
+			ois = new ObjectInputStream(fis);
+
+			ArrayList t = (ArrayList) ois.readObject();
+			this.t = t;
+			ta.append("dat파일에서 로드했습니다.\n");
+		} catch (Exception ex) {
+		} finally {
+			try {
+
+				ois.close();
+				fis.close();
+			} catch (IOException ioe) {
+			}
+		}
+	}
+	public void save_to_text(String save_path){
+		FileOutputStream fos = null;
+		OutputStreamWriter osw = null;
+		BufferedWriter bw;
+		
+		try {
+			fos = new FileOutputStream(save_path);
+			osw = new OutputStreamWriter(fos, "euc-kr");
+			bw = new BufferedWriter(osw);
+			for (i = 0; i < t.size(); i++) {
+				bw.write(t.get(i).date + "/" + t.get(i).nation + "/"
+						+ t.get(i).exports + "/" + t.get(i).export_sum
+						+ "/" + t.get(i).imports + "/"
+						+ t.get(i).import_sum);
+				bw.newLine();
+			}
+			ta.append("텍스트 파일로 저장했습니다.\n");
+			bw.close();
+			osw.close();
+			fos.close();
+
+		} catch (IOException ioe) {
+			// TODO Auto-generated catch block
+			ioe.printStackTrace();
+		}
+	}
+	public void save_to_dat(String save_path){
+		FileOutputStream fos = null;
+		ObjectOutputStream oos = null;
+		try {
+			fos = new FileOutputStream(save_path);
+			oos = new ObjectOutputStream(fos);
+			oos.writeObject(t);
+			oos.reset();
+			ta.append("dat로 저장되었습니다\n");
+
+		} catch (Exception ex) {
+		} finally {
+			try {
+				oos.close();
+				fos.close();
+			} catch (IOException ioe) {
+
+			}
+		}
 	}
 
 	@Override
@@ -223,82 +408,34 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == button1) {
-			new Button1_Frame(MyFrame.this);
+			add();
 		}
 
 		if (e.getSource() == button2) {
-			if (t.size() != 0) {
-				new Button2_Frame(MyFrame.this);
-			} else {
-				ta.append("등록된 자료가 없습니다.\n");
-			}
-
+			edit();
 		}
 
 		if (e.getSource() == button3) {
-
-			if (t.size() != 0) {
-				for (i = 0; i < t.size(); i++) {
-					ta.append(t.get(i).toString());
-				}
-			} else {
-				ta.append("등록된 자료가 없습니다.\n");
-			}
-
+			show_all();
 		}
 		if (e.getSource() == button3_) {
-			set_Nations();
-			if (t.size() != 0) {
-				for (i = 0; i < n.size(); i++) {
-					ta.append(n.get(i).toString());
-				}
-			} else {
-				ta.append("등록된 자료가 없습니다.\n");
-			}
-
+			show_by_nation();
 		}
 
 		if (e.getSource() == button4) {
-			if (t.size() != 0) {
-
-				new Button4_Frame(MyFrame.this);
-			} else {
-				ta.append("등록된 자료가 없습니다.\n");
-			}
-
+			button4();
 		}
 
 		if (e.getSource() == button5) {
-
-	
-			if (t.size() != 0) {
-				new Button5_Select_Frame(MyFrame.this);
-			} else {
-				ta.append("등록된 자료가 없습니다.\n");
-			}
+			button5();
 		}
 
 		if (e.getSource() == button6) {
 
-			if (t.size() != 0) {
-				new Button6_Select_Frame(MyFrame.this);
-				/*
-				Button6_Frame b6 = new Button6_Frame(MyFrame.this);
-		        b6.pack();
-		        RefineryUtilities.centerFrameOnScreen(b6);
-		        b6.setVisible(true);
-				 */
-				
-				
-			} else {
-				ta.append("등록된 자료가 없습니다.\n");
-			}
-
 		}
 
 		if (e.getSource() == send_button) {
-			memo.append(tf.getText() + "\n");
-			tf.setText("");
+			send_to_memo();
 		}
 
 		if (e.getSource() == menuItemOpen) {
@@ -308,87 +445,21 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 			FileNameExtensionFilter filter2 = new FileNameExtensionFilter("데이터파일(*.dat)", "dat"); 
 			fc.setFileFilter(filter); 
 			fc.setFileFilter(filter2); 
-			
 			int answer = fc.showOpenDialog(null); 
 			if(answer == JFileChooser.APPROVE_OPTION){ 
 				f = fc.getSelectedFile();
 			}
-			
-			
-			
-			
-			
 			t.clear();
-			FileInputStream fis = null;
-			ObjectInputStream ois = null;
-			InputStreamReader isl = null;
 			if(f != null){
 				String format = f.toString();
 				format = format.substring(format.length()-3, format.length());
 				if(format.equals("txt")){
-					try {
-						fis = new FileInputStream(f);
-						isl = new InputStreamReader(fis, "euc-kr");
-						BufferedReader br = new BufferedReader(isl);
-						int count = 0;
-						
-
-						while (true) {
-							String list = br.readLine();
-							if (list != null) {
-								String[] list_split = list.split("/");
-								for (i = 0; i < 6; i++) {
-									list_split[i] = list_split[i].trim();
-								}
-								t.add(new Trade());
-								if (list_split[0].substring(5).length() == 1) {
-									list_split[0] = "0" + list_split[0];
-								}
-
-								t.get(count).date = list_split[0];
-								t.get(count).nation = list_split[1];
-								t.get(count).serial_num = (count + 1);
-								t.get(count).exports = Integer.parseInt(list_split[2]);
-								t.get(count).export_sum = Integer
-										.parseInt(list_split[3]);
-								t.get(count).imports = Integer.parseInt(list_split[4]);
-								t.get(count).import_sum = Integer
-										.parseInt(list_split[5]);
-								count++;
-
-							} else {
-								break;
-							}
-
-						}
-						ta.append("텍스트 파일에서 로드했습니다.\n");
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+					load_to_txt(f);
 				}
 				else if(format.equals("dat")){
-					try {
-
-						fis = new FileInputStream(f);
-						ois = new ObjectInputStream(fis);
-
-						ArrayList t = (ArrayList) ois.readObject();
-						this.t = t;
-						ta.append("dat파일에서 로드했습니다.\n");
-					} catch (Exception ex) {
-					} finally {
-						try {
-
-							ois.close();
-							fis.close();
-						} catch (IOException ioe) {
-						}
-					}
+					load_to_dat(f);
 				}
-			}
-			
-			
+			}	
 		}
 
 
@@ -401,90 +472,22 @@ class MyFrame extends JFrame implements ActionListener, KeyListener,
 			fc.setFileFilter(filter); 
 			fc.setFileFilter(filter2); 
 			
-			int answer = fc.showSaveDialog(null);
-			
-			
-			
+			int answer = fc.showSaveDialog(null);	
 			if(answer == JFileChooser.APPROVE_OPTION){
                 f = fc.getSelectedFile();
                 save_path = f.getAbsolutePath();
-
 			}
+			
 			String format = f.toString();
 			format = format.substring(format.length()-3, format.length());
-			FileOutputStream fos = null;
-			ObjectOutputStream oos = null;
-			OutputStreamWriter osw = null;
-			BufferedWriter bw;
-			
 			if(format.equals("txt")){
-
-				try {
-					fos = new FileOutputStream(save_path);
-					osw = new OutputStreamWriter(fos, "euc-kr");
-					bw = new BufferedWriter(osw);
-					for (i = 0; i < t.size(); i++) {
-						bw.write(t.get(i).date + "/" + t.get(i).nation + "/"
-								+ t.get(i).exports + "/" + t.get(i).export_sum
-								+ "/" + t.get(i).imports + "/"
-								+ t.get(i).import_sum);
-						bw.newLine();
-					}
-					ta.append("텍스트 파일로 저장했습니다.\n");
-					bw.close();
-					osw.close();
-					fos.close();
-
-				} catch (IOException ioe) {
-					// TODO Auto-generated catch block
-					ioe.printStackTrace();
-				}
+				save_to_text(save_path);	
 			}
 			else if(format.equals("dat")){
-				try {
-					fos = new FileOutputStream(save_path);
-					oos = new ObjectOutputStream(fos);
-					oos.writeObject(t);
-					oos.reset();
-					ta.append("dat로 저장되었습니다\n");
-
-				} catch (Exception ex) {
-				} finally {
-					try {
-						oos.close();
-						fos.close();
-					} catch (IOException ioe) {
-
-					}
-				}
+				save_to_dat(save_path);
 			}
-			
-			
-			
-
 		}
-		/*if (e.getSource() == menuItemSavedat) {
-
-			FileOutputStream fout = null;
-			ObjectOutputStream oos = null;
-			try {
-				fout = new FileOutputStream("TradeList.dat");
-				oos = new ObjectOutputStream(fout);
-				oos.writeObject(t);
-				oos.reset();
-				ta.append("dat로 저장되었습니다\n");
-
-			} catch (Exception ex) {
-			} finally {
-				try {
-					oos.close();
-					fout.close();
-				} catch (IOException ioe) {
-
-				}
-			}
-
-		}*/// check
+		
 		if (e.getSource() == menuItemExit) {
 			System.exit(0);
 		}
@@ -690,20 +693,7 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener {
 		Delete = new JButton("Delete");
 		CLOSE = new JButton("CLOSE");
 		Search = new JButton("SEARCH");
-
-		/*
-		 * for(int i=0;i<this.MyFrame.t.size();i++){ //콤보박스 설정
-		 * sample.add(this.MyFrame.t.get(i).nation); } Iterator<String> iterator
-		 * = sample.iterator(); while(iterator.hasNext()){ String nation =
-		 * iterator.next(); nation_choice.add(nation); }
-		 * 
-		 * for(int i=0;i<this.MyFrame.t.size();i++){ //콤보박스 설정
-		 * sample2.add(this.MyFrame.t.get(i).date); } Iterator<String> iterator2
-		 * = sample2.iterator(); while(iterator2.hasNext()){ String date =
-		 * iterator2.next(); date_choice.add(date); }
-		 */
 		setLayout(new GridLayout(6, 1));
-		tf3.disable();
 		p1.add(label2);
 		p1.add(label_year);
 		p1.add(year);
@@ -774,9 +764,16 @@ class Button2_Frame extends JDialog implements ActionListener, KeyListener {
 			dispose();
 		}
 		if (e.getSource() == Delete) {
-			MyFrame.t.remove(Integer.parseInt((tf3.getText())) - 1);
-			MyFrame.ta.append(tf3.getText() + "번 자료가 삭제되었습니다.");
-			dispose();
+			if(tf3.getText().equals("")){
+			}
+			else if(Integer.parseInt(tf3.getText()) > MyFrame.t.size() || Integer.parseInt(tf3.getText()) <1 ){
+			}
+			else{
+				MyFrame.t.remove(Integer.parseInt((tf3.getText())) - 1);
+				MyFrame.ta.append(tf3.getText() + "번 자료가 삭제되었습니다.\n");
+				dispose();
+			}
+
 
 		}
 		if (e.getSource() == CLOSE) {
@@ -869,9 +866,16 @@ class Button4_Frame extends JDialog implements ActionListener, KeyListener {
 		}
 		Iterator<String> iterator = sample.iterator();
 		nation_choice.add("전체");
+		int i=0;
+		MyFrame.set_Nations();
+		String [] nation = new String[MyFrame.n.size()]; 
 		while (iterator.hasNext()) {
-			String nation = iterator.next();
-			nation_choice.add(nation);
+			nation[i] = iterator.next();
+			i++;
+		}
+		Arrays.sort(nation);
+		for(i=0;i<nation.length;i++){
+			nation_choice.add(nation[i]);
 		}
 		Add = new JButton("Add");
 		Search = new JButton("SEARCH");
@@ -1364,11 +1368,19 @@ class Button5_Select_Frame extends JDialog implements ActionListener, KeyListene
 		
 		for(int i=0;i<this.MyFrame.t.size();i++){ //콤보박스 설정
 			sample.add(this.MyFrame.t.get(i).nation); 
-		} Iterator<String> iterator = sample.iterator(); 
+		} 
+		Iterator<String> iterator = sample.iterator();
 		nation_choice.add("전체");
-		while(iterator.hasNext()){ 
-			 String nation =	 iterator.next();
-			 nation_choice.add(nation); 
+		int i=0;
+		MyFrame.set_Nations();
+		String [] nation = new String[MyFrame.n.size()]; 
+		while (iterator.hasNext()) {
+			nation[i] = iterator.next();
+			i++;
+		}
+		Arrays.sort(nation);
+		for(i=0;i<nation.length;i++){
+			nation_choice.add(nation[i]);
 		}
 		Search.addActionListener(this);
 		CLOSE.addActionListener(this);
@@ -1440,11 +1452,6 @@ class Button6_Frame extends JDialog implements ActionListener, KeyListener {
 	}
 
 
-    /**
-     * Creates a sample dataset.
-     * 
-     * @return A sample dataset.
-     */
     private static PieDataset createDataset() {
     	int all=-1;
         DefaultPieDataset dataset = new DefaultPieDataset();
@@ -1453,7 +1460,6 @@ class Button6_Frame extends JDialog implements ActionListener, KeyListener {
         	if(nation_sample[j].equals("전체")){
         		all=1;
         	}
-        	
         }
 
 
@@ -1471,8 +1477,6 @@ class Button6_Frame extends JDialog implements ActionListener, KeyListener {
             				dataset.setValue(MyFrame.n.get(i).name, MyFrame.n.get(i).total_exports);
             			}
             		}
-            		//System.out.println(MyFrame.n.get(i).total_exports);
-            		
             	} 	
         	}
         	
@@ -1545,7 +1549,7 @@ class Button6_Frame extends JDialog implements ActionListener, KeyListener {
     private static JFreeChart createChart(PieDataset dataset) {
         
         JFreeChart chart = ChartFactory.createPieChart(
-            "",  // chart title
+            "",  				// chart title
             dataset,             // data
             false,               // include legend
             true,
@@ -1561,11 +1565,6 @@ class Button6_Frame extends JDialog implements ActionListener, KeyListener {
         
     }
     
-    /**
-     * Creates a panel for the demo (used by SuperDemo.java).
-     * 
-     * @return A panel.
-     */
     public static JPanel createDemoPanel() {
         JFreeChart chart = createChart(createDataset());
         return new ChartPanel(chart);
@@ -1609,6 +1608,7 @@ class Button6_Select_Frame extends JDialog implements ActionListener, KeyListene
 	JLabel label3;
 	Choice legend_choice;
 	Choice nation_choice;
+	JTextField n_tf;
 	JTextArea ta;
 	JButton Add;
 	JButton Search;
@@ -1622,7 +1622,7 @@ class Button6_Select_Frame extends JDialog implements ActionListener, KeyListene
 	public Button6_Select_Frame(MyFrame MyFrame) {
 		this.MyFrame = MyFrame;
 		setTitle("Select Legend");
-		setSize(500,220);
+		setSize(370,220);
 		label1 = new JLabel("범례설정");
 		label2 = new JLabel("국가선택");
 		label3 = new JLabel("검색대상");
@@ -1646,17 +1646,24 @@ class Button6_Select_Frame extends JDialog implements ActionListener, KeyListene
 		}
 		Iterator<String> iterator = sample.iterator();
 		nation_choice.add("전체");
+		int i=0;
+		MyFrame.set_Nations();
+		String [] nation = new String[MyFrame.n.size()]; 
 		while (iterator.hasNext()) {
-			String nation = iterator.next();
-			nation_choice.add(nation);
+			nation[i] = iterator.next();
+			i++;
+		}
+		Arrays.sort(nation);
+		for(i=0;i<nation.length;i++){
+			nation_choice.add(nation[i]);
 		}
 		Add.addActionListener(this);
 		Search.addActionListener(this);
 		CLOSE.addActionListener(this);
-		setLayout(new GridLayout(3,1));
+		setLayout(new GridLayout(4,1));
 		
-		p1.add(label1);
-		p1.add(legend_choice);
+		p2.add(label1);
+		p2.add(legend_choice);
 		p1.add(label2);
 		p1.add(nation_choice);
 		p1.add(Add);
@@ -1667,7 +1674,8 @@ class Button6_Select_Frame extends JDialog implements ActionListener, KeyListene
 		p4.add(CLOSE);	
 		add(p1,0);
 		add(p3,1);
-		add(p4,2);
+		add(p2,2);
+		add(p4,3);
 		setVisible(true);
 	}
 

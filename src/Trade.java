@@ -16,10 +16,10 @@ public class Trade implements Serializable{
 		date = null;
 		nation = null;
 		serial_num=0;
-		exports=0; //수출건수
-		export_sum=0; //수출금액
-		imports=0; //수입건수
-		import_sum=0; //수입금액  단위:천불(USD 1,000)
+		exports=0; 
+		export_sum=0; 
+		imports=0; 
+		import_sum=0; 
 	}
 		
 }
