@@ -487,7 +487,7 @@ class MyFrame extends JFrame implements ActionListener, KeyListener {
 					}
 					t.add(new Trade());
 					if (list_split[0].substring(5).length() == 1) {
-						list_split[0] = "0" + list_split[0];
+						list_split[0] = list_split[0].substring(0,4)+ "0" + list_split[0].substring(5).length();
 					}
 
 					t.get(count).date = list_split[0];
