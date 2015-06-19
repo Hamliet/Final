@@ -1129,7 +1129,7 @@ class Button4_Frame extends JDialog implements ActionListener {
 									}
 								}
 							}
-						} else if (all_date == 1 && all != 1) { // 선택날짜, 모든국가일때
+						} else if (all_date != 1 && all == 1) { // 선택날짜, 모든국가일때
 							MyFrame.ta.append("\n<<검색결과>>\n");
 
 							for (int i = 0; i < MyFrame.t.size(); i++) {
